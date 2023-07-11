@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
 
-  <h1>Switchboard<br>Solana Functions Template</h1>
+  <h1>Switchboard<br>EVM Functions Template</h1>
 
   <p>
     <a href="https://discord.gg/switchboardxyz">
@@ -19,7 +19,12 @@ Switchboards V3 architecture allows users to permissionlessly build and run any 
 
 ## Table of Content
 
-- [Project Setup](#setup)
+- [Switchboard Functions](#switchboard-functions)
+- [Table of Content](#table-of-content)
+- [Setup](#setup)
+- [Build](#build)
+- [Publishing](#publishing)
+- [Integration](#integration)
 - [Examples](#examples)
   - [Binance](#binance)
   - [Secrets](#secrets)
