@@ -1,0 +1,4 @@
+[submodule "sbv3"]
+	path = sbv3
+	url = https://github.com/switchboard-xyz/sbv3
+	branch = anoushk1234/evm-sdk

@@ -6,6 +6,6 @@ edition = "2021"
 [dependencies]
 tokio = "^1"
 futures = "0.3"
-sb-evm-functions = {path="../sbv3/rust/sb-evm-functions"}
+sb-evm-functions = {path="./sbv3/rust/sb-evm-functions"}
 switchboard-utils = "0.6"
 ethers = { version = "2.0.3", features = [ "ws", "rustls" ] }
