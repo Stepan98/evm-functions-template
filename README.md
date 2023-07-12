@@ -22,54 +22,71 @@ Switchboards V3 architecture allows users to permissionlessly build and run any 
 - [Switchboard Functions](#switchboard-functions)
 - [Table of Content](#table-of-content)
 - [Setup](#setup)
-- [Build](#build)
-- [Publishing](#publishing)
-- [Integration](#integration)
-- [Examples](#examples)
-  - [Binance](#binance)
-  - [Secrets](#secrets)
+  - [Configure the function](#configure-the-function)
+- [Build and Push](#build-and-push)
 
 ## Setup
 
-Edit the Makefile with your docker image name. Make sure to include your docker
-organization if publishing to the repository (For example:
-`switchboard/my-function`).
+- Get an sgx enabled machine, you can use [Azure cloud](https://learn.microsoft.com/en-us/azure/confidential-computing/quick-create-portal) to do this.
+- SSH into the machine and install docker engine.
 
-## Build
+### Configure the function
 
-Run the following command to build the docker image with your custom function
+First create a json file that stores the ABI in `src/<file-path>.json`.
+Then set the enviroment variables in `main.rs`.
 
-```bash
-make
+You'll need to set the target contract as the address of your contract. The verifying contract and chain id would need to be set as per the chain. The below
+values are for arbitrum goerli testnet.
+
+```rs
+std::env::set_var("CHAIN_ID", "421613"); 
+std::env::set_var(
+        "VERIFYING_CONTRACT",
+        "0x8b8F944F8506db8A91f85A31A956b165259C617F",
+    );
+std::env::set_var(
+        "TARGET_CONTRACT",
+        "<address-of-your-contract>",
+    );
 ```
 
-You should see a `measurement.txt` in the root of the project containing the
-base64 encoding of the MRENCLAVE measurement. You will need to re-generate this
-measurement anytime your source code or dependencies change.
+Then add your wallet private key and fund it with the gas token.
 
-## Publishing
-
-```bash
-make publish
+```rs
+let wallet: Wallet<SigningKey> =
+        "your-private-key"
+            .parse::<LocalWallet>()
+            .unwrap()
+            .with_chain_id(client.get_chainid().await.unwrap().as_u64());
 ```
 
-## Integration
+Then load the contract and create the function call.
 
-To get started, you will first need to:
+```rs
+  abigen!(CONTRACT_NAME, "src/<file-path>.json");
 
-1. Build your docker image and upload to a Docker/IPFS repository
-2. Generate your MRENCLAVE measurement
+  let contract_address = env::var("TARGET_CONTRACT")
+        .unwrap()
+        .parse::<ethers::types::Address>()
+        .unwrap();
 
-Next, you will need to create a Function account for your given MRENCLAVE
-measurement. Head over to [app.switchboard.xyz](https://app.switchboard.xyz) and
-create a new function with your given repository and MRENCLAVE measurement.
+   let my_contract = ERC20::new(contract_address, middleware);
+   let contract_fn_call: ContractCall<EVMMiddleware<_>, _> =
+        my_contract.mint(recipient, 100.into()); // im calling mint but you can add any contract call here
+   let calls = vec![contract_fn_call.clone()];
+```
 
-## Examples
+That's it, just pass these to the runner as already done in `main.rs`.
+## Build and Push
 
-### Binance
+Now build the image using:
 
-An example function to pull in many spot prices from Binance.
+```bash
+docker build -t org-name/image-name:tag .
+```
+and push it to your registry using:
 
-### Secrets
-
-An example function that uses Switchboard Secrets.
+```bash
+docker push org-name/image-name:tag
+```
+Pass the uploaded image url to the function manager and it should handle calling the functions.

@@ -1,4 +1,4 @@
-use std::{sync::Arc, vec};
+use std::{env, sync::Arc, vec};
 
 use ethers::{
     abi::Address,
@@ -34,7 +34,8 @@ async fn main() {
             .with_chain_id(client.get_chainid().await.unwrap().as_u64());
 
     // your target contract address
-    let contract_address = "0xcD016103a3d6aeD82b19B99f766ef0444a09000c"
+    let contract_address = env::var("TARGET_CONTRACT")
+        .unwrap()
         .parse::<ethers::types::Address>()
         .unwrap();
     abigen!(ERC20, "src/example-contracts/ERC20-ABI.json");
