@@ -27,7 +27,7 @@ async fn main() {
     ); // SB arb testnet contract
     std::env::set_var(
         "TARGET_CONTRACT",
-        "0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852",
+        "0xcD016103a3d6aeD82b19B99f766ef0444a09000c",
     );
     // set the gas limit and expiration
     let gas_limit = 1000000;
@@ -40,24 +40,12 @@ async fn main() {
             .parse::<LocalWallet>()
             .unwrap()
             .with_chain_id(client.get_chainid().await.unwrap().as_u64());
-
+    println!("{:?}", wallet.address());
     // your target contract address
-    let contract_address = "0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852"
+    let contract_address = "0xcD016103a3d6aeD82b19B99f766ef0444a09000c"
         .parse::<ethers::types::Address>()
         .unwrap();
-    abigen!(
-        IERC20,
-        r#"[
-            function totalSupply() external view returns (uint256)
-            function balanceOf(address account) external view returns (uint256)
-            function transfer(address recipient, uint256 amount) external returns (bool)
-            function allowance(address owner, address spender) external view returns (uint256)
-            function approve(address spender, uint256 amount) external returns (bool)
-            function transferFrom( address sender, address recipient, uint256 amount) external returns (bool)
-            event Transfer(address indexed from, address indexed to, uint256 value)
-            event Approval(address indexed owner, address indexed spender, uint256 value)
-        ]"#,
-    );
+    abigen!(ERC20, "src/ERC20-ABI.json");
 
     let middleware: Arc<SignerMiddleware<Provider<Http>, Wallet<SigningKey>>> = Arc::new(
         SignerMiddleware::new_with_provider_chain(client.clone(), wallet.clone())
@@ -70,10 +58,12 @@ async fn main() {
         middleware.clone(),
     );
 
-    let erc20_contract = IERC20::new(contract_address, middleware);
-    let recipient = Address::random();
-    let contract_fn_call: ContractCall<EVMMiddleware<_>, bool> =
-        erc20_contract.transfer(recipient, 100.into());
+    let erc20_contract = ERC20::new(contract_address, middleware);
+    let recipient = "0x56929386E0966a8bb9734a8949AFCF5c9df47743"
+        .parse()
+        .unwrap();
+    let contract_fn_call: ContractCall<EVMMiddleware<_>, _> =
+        erc20_contract.mint(recipient, 100.into());
 
     // create a vec of contract calls to pass to the function runner
     let calls = vec![contract_fn_call.clone()];
