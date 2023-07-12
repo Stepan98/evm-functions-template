@@ -37,7 +37,7 @@ async fn main() {
     let contract_address = "0xcD016103a3d6aeD82b19B99f766ef0444a09000c"
         .parse::<ethers::types::Address>()
         .unwrap();
-    abigen!(ERC20, "src/ERC20-ABI.json");
+    abigen!(ERC20, "src/example-contracts/ERC20-ABI.json");
 
     let middleware: Arc<SignerMiddleware<Provider<Http>, Wallet<SigningKey>>> = Arc::new(
         SignerMiddleware::new_with_provider_chain(client.clone(), wallet.clone())
