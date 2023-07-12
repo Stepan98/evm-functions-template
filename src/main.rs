@@ -12,15 +12,7 @@ use sb_evm_functions::{bindings, sdk::EVMMiddleware};
 
 #[tokio::main(worker_threads = 12)]
 async fn main() {
-    // set the env variables with the necessary information like verifier contract etc
-    std::env::set_var("FUNCTION_KEY", "0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852"); // not needed right now
-    std::env::set_var(
-        "FUNCTION_REQUEST_KEY",
-        "0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852",
-    ); // not needed
-    std::env::set_var("FUNCTION_VERSION", "1"); // this is fixed anyway so not required
     std::env::set_var("CHAIN_ID", "421613"); // arb Goerli testnet
-    std::env::set_var("FUNCTION_NAME", "Switchboard"); // this is fixed anyway so not required
     std::env::set_var(
         "VERIFYING_CONTRACT",
         "0x8b8F944F8506db8A91f85A31A956b165259C617F",
@@ -40,7 +32,7 @@ async fn main() {
             .parse::<LocalWallet>()
             .unwrap()
             .with_chain_id(client.get_chainid().await.unwrap().as_u64());
-    println!("{:?}", wallet.address());
+
     // your target contract address
     let contract_address = "0xcD016103a3d6aeD82b19B99f766ef0444a09000c"
         .parse::<ethers::types::Address>()
