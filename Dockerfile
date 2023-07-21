@@ -5,7 +5,7 @@ ARG CARGO_NAME=switchboard-function
 
 WORKDIR /home/root/switchboard-function
 COPY . .
-RUN sudo apt-get install git && git submodule update --init --recursive
+RUN apt-get install git && git submodule update --init --recursive
 RUN  --mount=type=cache,target=/usr/local/cargo/registry --mount=type=cache,target=/home/root/switchboard-function/target \
     cargo build --release && \
     cargo strip && \
