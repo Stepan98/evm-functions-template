@@ -7,8 +7,8 @@ use ethers::{
     signers::{LocalWallet, Signer, Wallet},
     types::transaction::eip712::EIP712Domain,
 };
-pub use sb_evm_functions::sdk::EVMFunctionRunner;
-use sb_evm_functions::{bindings, sdk::EVMMiddleware};
+pub use switchboard_evm::sdk::EVMFunctionRunner;
+use switchboard_evm::{bindings, sdk::EVMMiddleware};
 
 #[tokio::main(worker_threads = 12)]
 async fn main() {
@@ -46,7 +46,7 @@ async fn main() {
             .unwrap(),
     );
     // the switchboard verifying contract
-    let sb_contract = sb_evm_functions::bindings::switchboard::Switchboard::new(
+    let sb_contract = switchboard_evm::bindings::switchboard::Switchboard::new(
         contract_address,
         middleware.clone(),
     );
@@ -62,13 +62,13 @@ async fn main() {
     let calls = vec![contract_fn_call.clone()];
 
     // First, initialize the runner instance with a freshly generated Gramine keypair
-    let runner = EVMFunctionRunner::new("https://goerli-rollup.arbitrum.io/rpc").unwrap();
+    let runner = EVMFunctionRunner::new().unwrap();
 
     // Finally, emit the signed quote and partially signed transaction to the functionRunner oracle
     // The functionRunner oracle will use the last outputted word to stdout as the serialized result. This is what gets executed on-chain.
     runner
         .emit(
-            sb_contract,
+            contract_address,
             expiration_time_seconds.into(),
             gas_limit.into(),
             calls,
