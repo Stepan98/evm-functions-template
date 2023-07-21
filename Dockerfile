@@ -15,11 +15,13 @@ FROM switchboardlabs/sgx-function
 ARG CARGO_NAME=switchboard-function
 
 # Copy the binary
+WORKDIR /sgx
 COPY --from=builder /sgx/app /sgx
+COPY ./config/app.manifest.template /sgx/app.manifest.template
 
 # Get the measurement from the enclave
 RUN /get_measurement.sh
-RUN gramine-manifest /app.manifest.template > app.manifest
+RUN gramine-manifest /sgx/app.manifest.template > app.manifest
 RUN gramine-sgx-sign --manifest app.manifest --output app.manifest.sgx | tail -2 | tee /measurement.txt
 
 ENTRYPOINT ["/bin/bash", "/boot.sh"]
