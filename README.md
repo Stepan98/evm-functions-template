@@ -64,7 +64,7 @@ Developers with proficiency in Rust can leverage its lightweight yet robust capa
 
 **Example**:
 
-- [Link to Price Oracle Implementation](link_to_price_oracle)
+- [Link to Price Oracle Implementation](./rust/01_price_oracle/SwitchboardPushReceiver)
 - [Link to Rust Template](link_to_rust_template)
 
 ## Setup Example
