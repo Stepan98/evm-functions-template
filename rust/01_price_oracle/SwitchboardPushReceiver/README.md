@@ -1,7 +1,38 @@
 # Switchboard Push Receiver
 
-[![Test smart contracts](https://github.com/switchboard-xyz/switchboard-evm/actions/workflows/test-contracts.yml/badge.svg)](https://github.com/switchboard-xyz/switchboard-evm/actions/workflows/test-contracts.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+<div align="center">
+  <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
+
+  <h1>Switchboard<br>EVM Functions Template</h1>
+
+  <p>
+    <a href="https://discord.gg/switchboardxyz">
+      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white" />
+    </a>
+    <a href="https://twitter.com/switchboardxyz">
+      <img alt="Twitter" src="https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard" />
+    </a>
+  </p>
+</div>
+
+## Table of Content
+
+- [Prerequisites](#prerequisites)
+  - [Installing Docker](#installing-docker)
+  - [Docker Setup](#docker-setup)
+  - [Build and Push](#build-and-push)
+- [Components](#components)
+  - [Contract](#contract)
+  - [Switchboard Function](#switchboard-function)
+  - [Publishing and Initialization](#publishing-and-initialization)
+  - [Adding Funding to Function](#adding-funding-to-function)
+  - [Printing Function Data](#printing-function-data)
+- [Writing Switchboard Rust Functions](#writing-switchboard-rust-functions)
+  - [Setup](#setup)
+  - [Minimal Example](#minimal-switchboard-function)
+  - [Deploying and maintenance](#deploying-and-maintenance)
+- [Writing Receiver Contracts](#writing-receiver-contracts)
+  - [Receiver Example](#receiver-example)
 
 ## Prerequisites
 
@@ -237,6 +268,8 @@ After you publish the function and create it on the blockchain, you must keep th
 While Switchboard Functions can call back into any number of on-chain functions, it's useful to limit access to some privileged functions to just _your_ Switchboard Function.
 
 In order to do this you'll need to know the switchboard address you're using, and which functionId will be calling into the function in question.
+
+### Receiver Example
 
 Recipient.sol
 
