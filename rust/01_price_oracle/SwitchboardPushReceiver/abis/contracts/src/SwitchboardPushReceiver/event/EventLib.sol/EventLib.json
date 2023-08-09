@@ -1,0 +1,5 @@
+[
+  "event NewAdapter(bytes32 indexed,address indexed,address indexed)",
+  "event NewResult(bytes32 indexed,uint80 indexed,int256,uint256)",
+  "event ReadEvent(address indexed,address indexed,int256,uint256)"
+]
