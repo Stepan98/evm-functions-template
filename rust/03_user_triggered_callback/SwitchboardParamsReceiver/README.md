@@ -192,9 +192,9 @@ main.rs
 
 ```rust
 use ethers::{
-    prelude::{abigen, SignerMiddleware, ContractCall},
+    prelude::{abigen, SignerMiddleware, ContractCall, EthAbiType, EthAbiCodec},
     providers::{Http, Provider},
-    types::{U256},
+    types::{U256, Address},
 };
 use rand;
 use std::sync::Arc;
@@ -202,6 +202,7 @@ use std::time::{SystemTime, Duration};
 use switchboard_evm::{
     sdk::{EVMFunctionRunner, EVMMiddleware},
 };
+use std::env;
 
 
 #[tokio::main(worker_threads = 12)]
@@ -212,17 +213,23 @@ async fn main() {
     abigen!(
         Receiver,
         r#"[
-            function callback(uint256)
+            function fillOrder(uint256,uint256)
         ]"#,
     );
+
+    // Define the type we're getting from the function call
+    #[derive(Debug, Clone, EthAbiType, EthAbiCodec)]
+    struct OrderParams {
+        order_id: U256,
+        sender: Address,
+    }
 
     // Generates a new enclave wallet, pulls in relevant environment variables
     let function_runner = EVMFunctionRunner::new().unwrap();
 
     // set the gas limit and expiration date
-    let gas_limit = 1000000;
-    let expiration_time_seconds = 60;
-    let current_time = SystemTime::now()
+    let gas_limit = 1_000_000;
+    let expiration_time_seconds = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap_or(Duration::ZERO)
             .as_secs() + 64;
@@ -237,34 +244,67 @@ async fn main() {
             .unwrap(),
     );
 
-    // @TODO: your target contract address here
-    // In the push receiver example this is set via environment variable
-    let contract_address = "0x1cEA45f047FEa89887B79ce28723852f288eE09B"
+    // get contract address from docker env
+    let contract_address = env!("SWITCHBOARD_RECEIVER_ADDRESS")
         .parse::<ethers::types::Address>()
         .unwrap();
+
     let receiver_contract = Receiver::new(contract_address, client);
 
-    // generate a random number U256
-    let random: [u64; 4] = rand::random();
-    let random = U256(random);
+    // Get individual call parameters and their corresponding call ids
+    let params = function_runner.params::<OrderParams>();
 
-    // call function
-    let contract_fn_call: ContractCall<EVMMiddleware<_>, _> =
-        receiver_contract.callback(random);
+    // No calls from these addresses will be processed
+    // It'll be cheaper to check off-chain in a function runner than on-chain in a contract,
+    // especially if there are many
+    let blocked_senders = vec!["0x0000000000000000000000000000000000000000"];
 
-    // create a vec of contract calls to pass to the function runner
-    let calls = vec![contract_fn_call.clone()];
+    // Handle each function call that has happened since the last run
+    let calls: Vec<ContractCall<EVMMiddleware<_>, _>> = params.iter()
+        .filter(|param| {
+            // params in format (Result<OrderParams, Err>, call_id Address)[], one per call since last fn run
+            // here we filter out params that failed to parse & blocked params.sender addresses
+            !param.0.is_err() && !blocked_senders.contains(&param.0.as_ref().unwrap().sender.to_string().as_str())
+        })
+        .map(|param| {
+
+            // Handle each param, call_id pair
+            let (param_result, call_id) = param;
+            let param = param_result.as_ref().unwrap();
+            let order_id = param.order_id;
+
+            // generate a random number U256
+            let random: [u64; 4] = rand::random();
+            let random = U256(random);
+
+            // Create a contract call for each param
+            let contract_fn_call: ContractCall<EVMMiddleware<_>, _> =
+                receiver_contract.fill_order(order_id, random);
+
+            // return the contract call
+            contract_fn_call
+        }).collect::<Vec<_>>();
 
     // Emit the result
-    // This will encode and sent the function data and run them as metatransactions
-    // (in a single-tx) originating from the switchboard contract with the functionId encoded as the sender
-    // https://eips.ethereum.org/EIPS/eip-2771
+    // @NOTE function_runner.emit will mark all call_ids as resolved
     function_runner.emit(
         contract_address,
-        current_time.try_into().unwrap(),
+        expiration_time_seconds.try_into().unwrap(),
         gas_limit.into(),
         calls,
     ).unwrap();
+
+    // Alternatively if you wanted to only handle a subsset of calls in each run, you can call emit_resolve
+    // which only marks the passed-in call_ids as completed - leaving the rest for subsequent runs to handle.
+    //
+    // function_runner.emit_resolve(
+    //     contract_address,
+    //     expiration_time_seconds.try_into().unwrap(),
+    //     gas_limit.into(),
+    //     calls,
+    //     call_ids, // Vec<Address> of call_ids to resolve <--- this is the only difference
+    // ).unwrap();
+
 }
 ```
 
@@ -301,72 +341,165 @@ In order to do this you'll need to know the switchboard address you're using, an
 
 ### Receiver Example
 
+ISwitchboard.sol (just a simple subset of switchboard interfaces)
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
+
+interface ISwitchboard {
+    function callFunction(
+        address functionId,
+        bytes memory params
+    ) external payable returns (address callId);
+}
+
+```
+
 Recipient.sol
 
-```sol
+```solidity
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-// EIP2771 Context
-// Inherited by all contracts that are recipients of switchboard callbacks
+import {ISwitchboard} from "./ISwitchboard.sol";
+
 contract Recipient {
-  address immutable switchboard;
+    address immutable switchboard;
 
-  constructor(address _switchboard) {
-    switchboard = _switchboard;
-  }
-
-  // get the encoded sender if this message is coming from the switchboard contract
-  // if things are working as intended, the sender will be the functionId
-
-  function getMsgSender() internal view returns (address payable signer) {
-    signer = payable(msg.sender);
-    if (msg.data.length >= 20 && signer == switchboard) {
-      assembly {
-        signer := shr(96, calldataload(sub(calldatasize(), 20)))
-      }
+    constructor(address _switchboard) {
+        switchboard = _switchboard;
     }
-  }
+
+    // handle call to switchboard function
+    function callSwitchboardFunction(
+        address functionId,
+        bytes memory params // arbitrary user-defined parameters handled function-side
+    ) internal returns (address callId) {
+        callId = ISwitchboard(switchboard).callFunction{value: msg.value}(
+            functionId,
+            params
+        );
+    }
+
+    // get forwarded sender if trusted forwarder is used
+    function getMsgSender() internal view returns (address payable signer) {
+        signer = payable(msg.sender);
+        if (msg.data.length >= 20 && signer == switchboard) {
+            assembly {
+                signer := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
+        }
+    }
 }
 ```
 
 Example.sol
 
-```sol
+```solidity
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import { Recipient } from "./Recipient.sol";
+import {Recipient} from "./Recipient.sol";
 
-contract ReceiverExample is Recipient {
-  uint256 public randomValue;
-  address functionId;
+// An example of a contract where we pass some parameters to the callback function so we can
+// handle individual orders in a batch.
+contract SwitchboardParamsReceiver is Recipient {
+    // Events
+    event OrderCreated(uint256 orderId, address callId, address sender);
+    event OrderResolved(uint256 orderId, address callId, uint256 value);
 
-  event NewRandomValue(uint256 value);
+    // Errors
+    error InvalidValue(uint256 value);
+    error InvalidSender(address expected, address actual);
+    error InvalidOrder(uint256 orderId);
 
-  constructor(
-    address _switchboard // Switchboard contract address
-  ) Recipient(_switchboard) {}
-
-  function callback(uint256 value) external {
-    // extract the sender from the callback, this validates that the switchboard contract called this function
-    address msgSender = getMsgSender();
-
-    if (functionId == address(0)) {
-      // set the functionId if it hasn't been set yet
-      functionId = msgSender;
+    // Structs
+    struct Order {
+        address callId;
+        address sender;
+        uint256 value;
+        bool filled;
     }
 
-    // make sure the encoded caller is our function id
-    if (msgSender != functionId) {
-      revert("Invalid sender");
+    // Switchboard Function Parameters
+    // This struct will be defined here, but also in the Switchboard Function itself
+    // We will abi.decode it off-chain to get the parameters
+    struct OrderParams {
+        uint256 orderId;
+        address sender;
     }
 
-    // set the random value
-    randomValue = value;
+    // Constants
+    uint256 public constant EXPECTED_FUNCTION_GAS_COST = 300_000;
 
-    // emit an event
-    emit NewRandomValue(value);
-  }
+    // State variables
+    address functionId;
+    uint256 nextOrderId;
+    mapping(uint256 => Order) public orders;
+    uint256 public latestValue;
+
+    // Pass the switchboard address and the function id to the constructor so we can validate the callback sender
+    constructor(
+        address _switchboard // Switchboard contract address
+    ) Recipient(_switchboard) {}
+
+    // Call the switchboard function with the order parameters
+    // The function will call back into fillOrder with the value
+    function createOrder() external payable {
+        // make sure the value is correct - this will make it so the downstream users
+        //  / order creators are the ones paying for the order execution
+        if (msg.value < EXPECTED_FUNCTION_GAS_COST * tx.gasprice) {
+            revert InvalidValue(msg.value);
+        }
+
+        // encode the order parameters
+        bytes memory encodedOrder = abi.encode(
+            OrderParams({orderId: nextOrderId, sender: getMsgSender()})
+        );
+
+        // call out to the swithcboard function, triggering an off-chain run
+        address callId = callSwitchboardFunction(functionId, encodedOrder);
+
+        // store the order data
+        orders[nextOrderId].sender = msg.sender;
+        orders[nextOrderId].callId = callId;
+
+        // emit an event
+        emit OrderCreated(nextOrderId, callId, getMsgSender());
+
+        // increment nextOrderId
+        nextOrderId++;
+    }
+
+    // Callback into contract with value computed off-chain
+    function fillOrder(uint256 orderId, uint256 value) external {
+        // extract the sender from the callback, this validates that the switchboard contract called this function
+        address msgSender = getMsgSender();
+
+        // if callback hasn't been hit, set it on first function run
+        if (functionId == address(0) && msg.sender == switchboard) {
+            functionId = msgSender;
+        }
+
+        // make sure the encoded caller is our function id
+        if (msgSender != functionId) {
+            revert InvalidSender(functionId, msgSender);
+        }
+
+        // sanity check that the order has been registered
+        if (orders[orderId].sender == address(0)) {
+            revert InvalidOrder(orderId);
+        }
+
+        // fill order and mark it as filled
+        orders[orderId].value = value;
+        orders[orderId].filled = true;
+
+        latestValue = value;
+
+        // emit an event
+        emit OrderResolved(orderId, msgSender, value);
+    }
 }
 ```
