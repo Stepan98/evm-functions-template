@@ -152,7 +152,7 @@ npx hardhat run scripts/extend_function.ts  --network arbitrumTestnet
 
 ### Printing Function Data
 
-Now view your function config to endure it is to your liking:
+Now view your function config to ensure it is to your liking:
 
 ```bash
 export FUNCTION_ID=0x96cE076e3Dda35679316b12F2b5F7b4A92C9a294
