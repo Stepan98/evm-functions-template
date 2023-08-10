@@ -65,7 +65,8 @@ Developers with proficiency in Rust can leverage its lightweight yet robust capa
 **Example**:
 
 - [Link to Price Oracle Implementation](./rust/01_price_oracle/SwitchboardPushReceiver)
-- [Link to Rust Template](link_to_rust_template)
+- [Link to Randomness Callback Implementation](./rust/02_randomness_callback/SwitchboardReceiver)
+- [Link to User-Triggered Function With Params Implementation](./rust/03_user_triggered_callback/SwitchboardParamsReceiver)
 
 ## Setup Example
 
@@ -106,7 +107,7 @@ Then load the contract and create the function call.
 
 ```rs
   abigen!(CONTRACT_NAME, "src/<file-path>.json");
-
+g
   let contract_address = env::var("TARGET_CONTRACT")
         .unwrap()
         .parse::<ethers::types::Address>()
