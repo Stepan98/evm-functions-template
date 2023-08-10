@@ -30,6 +30,7 @@
 - [Writing Switchboard Rust Functions](#writing-switchboard-rust-functions)
   - [Setup](#setup)
   - [Minimal Example](#minimal-switchboard-function)
+  - [Testing your function](#testing-your-function)
   - [Deploying and maintenance](#deploying-and-maintenance)
 - [Writing Receiver Contracts](#writing-receiver-contracts)
   - [Receiver Example](#receiver-example)
@@ -128,10 +129,15 @@ After this is published, you are free to make your function account to set the r
 
 ### Initializing the function
 
+You'll need the queue id and switchboard contract address from the [Project README.md](../../README.md) for the network you're targetting.
+
 See `scripts/create_function.ts` to create and deploy the function:
 
 ```bash
-npx hardhat run scripts/create_function.ts  --network arbitrumTestnet --container switchboardlabs/test --schedule "30 * * * * *"
+export QUEUE_ID=0x392a3217624aC36b1EC1Cf95905D49594A4DCF64 # placeholder
+export SCHEDULE="30 * * * * *" # every 30 seconds
+export CONTAINER=switchboardlabs/test
+npx hardhat run scripts/create_function.ts  --network arbitrumTestnet # or coredaoTestnet
 ```
 
 ### Adding Funding to Function
@@ -139,7 +145,9 @@ npx hardhat run scripts/create_function.ts  --network arbitrumTestnet --containe
 Add funds to your function by doing the following:
 
 ```bash
-npx hardhat run scripts/extend_function.ts --network arbitrumTestnet --functionId=$FUNCTION_ADDRESS --eth 0.1
+export FUNCTION_ID=0x96cE076e3Dda35679316b12F2b5F7b4A92C9a294
+export ETH_VALUE="0.1"
+npx hardhat run scripts/extend_function.ts  --network arbitrumTestnet
 ```
 
 ### Printing Function Data
@@ -147,7 +155,8 @@ npx hardhat run scripts/extend_function.ts --network arbitrumTestnet --functionI
 Now view your function config to endure it is to your liking:
 
 ```bash
-npx hardhat run scripts/check_function.ts --network arbitrumTestnet --functionId=$FUNCTION_ADDRESS
+export FUNCTION_ID=0x96cE076e3Dda35679316b12F2b5F7b4A92C9a294
+npx hardhat run scripts/check_function.ts  --network arbitrumTestnet
 ```
 
 ## Writing Switchboard Rust Functions
@@ -257,6 +266,27 @@ async fn main() {
         calls,
     ).unwrap();
 }
+```
+
+### Testing your function
+
+We can't guarantee that the function will run on the blockchain, but we can test that it compiles and runs locally.
+
+Run the following to test your function:
+
+```bash
+export CHAIN_ID=12345 # can be any integer
+export VERIFYING_CONTRACT=$SWITCHBOARD_ADDRESS # can be any valid address
+export FUNCTION_KEY=$FUNCTION_ID # can be any valid address
+cargo build
+cargo run # Note: this will include a warning about a missing quote which can be safely ignored.
+```
+
+Successful output:
+
+```bash
+WARNING: Error generating quote. Function will not be able to be transmitted correctly.
+FN_OUT: 7b2276657273696f6e223a312c2271756f7465223a5b5d2c22666e5f6b6579223a5b3134342c32332c3233322c34342c39382c32302c39372c3232392c3138392c33302c3235322c3133362c37362c332c3136382c3130362c3138322c34352c3137352c3137325d2c227369676e6572223a5b3135382c32332c3137302c3133322c3230302c3130322c35302c38352c31302c3134382c3235322c35372c3132362c372c31372c32352c37322c3131342c38322c3134365d2c22666e5f726571756573745f6b6579223a5b5d2c22666e5f726571756573745f68617368223a5b5d2c22636861696e5f726573756c745f696e666f223a7b2245766d223a7b22747873223a5b7b2265787069726174696f6e5f74696d655f7365636f6e6473223a313639313633383836332c226761735f6c696d6974223a2235353030303030222c2276616c7565223a2230222c22746f223a5b38332c3130372c3135352c35382c39382c3132382c37332c3233392c3134382c3133332c3133342c33392c3131382c31362c34382c3235302c3130372c3133382c3234382c3135375d2c2266726f6d223a5b3135382c32332c3137302c3133322c3230302c3130322c35302c38352c31302c3134382c3235322c35372c3132362c372c31372c32352c37322c3131342c38322c3134365d2c2264617461223a5b3136302c3232332c3131392c3130362...
 ```
 
 ### Deploying and Maintenance

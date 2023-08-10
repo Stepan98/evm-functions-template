@@ -11,6 +11,8 @@ async function main() {
   const container = process.env.CONTAINER;
   const queueId = process.env.QUEUE_ID;
   const ethValue = process.env.ETH_VALUE ?? "0.1";
+  let functionId =
+    process.env.FUNCTION_ID ?? ethers.Wallet.createRandom().address;
 
   if (!diamondAddress) {
     throw new Error(
@@ -41,7 +43,6 @@ async function main() {
     diamondAddress
   );
 
-  const functionId = ethers.Wallet.createRandom().address;
   const [func, tx] = await FunctionAccount.create(
     switchboardProgram,
     {
