@@ -12,10 +12,10 @@ pub struct CoinbaseBook {
     pub bids: Vec<(String, String, i64)>,
     pub asks: Vec<(String, String, i64)>,
 }
-impl Into<NormalizedTicker> for CoinbaseBook {
-    fn into(self) -> NormalizedTicker {
+impl Into<NormalizedBook> for CoinbaseBook {
+    fn into(self) -> NormalizedBook {
         let book = self;
-        let mut res = NormalizedTicker::default();
+        let mut res = NormalizedBook::default();
         for bid in book.bids.iter() {
             res.bids.push(NormalizedOrdersRow {
                 price: Decimal::try_from(bid.0.as_str()).unwrap(),

@@ -11,9 +11,9 @@ COPY ./Cargo.toml  ./
 COPY ./build.rs  ./
 COPY ./src ./src
 
-RUN rustup update
-
-RUN rustup override set stable
+# RUN rustup update
+#
+# RUN rustup override set stable
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETPLATFORM} --mount=type=cache,target=target,id=${TARGETPLATFORM} \
     cargo build --release && \
     cargo strip && \

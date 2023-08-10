@@ -23,37 +23,44 @@ pub use poloniex::*;
 pub mod pair;
 pub use pair::*;
 
-pub use switchboard_utils::reqwest;
-use switchboard_common;
-use switchboard_evm::{
-    sdk::{EVMFunctionRunner, EVMMiddleware},
-};
 use rust_decimal::prelude::*;
 use rust_decimal::Decimal;
-use std::collections::HashMap;
 use serde::Deserialize;
-use serde::Deserializer;
-use serde_json::Value;
-use std::hash::{Hash, Hasher};
+use std::collections::HashMap;
+use switchboard_common;
+use switchboard_evm::sdk::EVMFunctionRunner;
+pub use switchboard_utils::reqwest;
+
 use ethers::{
-    prelude::{abigen, SignerMiddleware, ContractCall, EthAbiType, EthAbiCodec},
+    prelude::{abigen, SignerMiddleware},
     providers::{Http, Provider},
-    types::{
-        U256,
-        I256,
-        Address,
-    },
+    types::I256,
 };
 use rand;
-use rand::SeedableRng;
 use rand::seq::SliceRandom;
+use rand::SeedableRng;
+use serde_json::Value;
+use std::hash::Hasher;
 
 use std::sync::Arc;
-use std::time::{SystemTime, Duration};
+use std::time::{Duration, SystemTime};
 
 #[allow(non_snake_case)]
 #[derive(Deserialize, Default, Clone, Debug)]
 pub struct NormalizedTicker {
+    pub price: Decimal,
+}
+#[allow(non_snake_case)]
+#[derive(Deserialize, Default, Clone, Debug)]
+pub struct NormalizedOrdersRow {
+    price: Decimal,
+    amount: Decimal,
+}
+#[allow(non_snake_case)]
+#[derive(Deserialize, Default, Clone, Debug)]
+pub struct NormalizedBook {
+    pub bids: Vec<NormalizedOrdersRow>,
+    pub asks: Vec<NormalizedOrdersRow>,
     pub price: Decimal,
 }
 #[derive(Debug, Clone)]
@@ -62,7 +69,7 @@ enum Sample {
     Bitfinex(BitfinexPair),
     Bitstamp(BitstampTicker),
     Bittrex(BittrexPair),
-    Coinbase(CoinbaseBook),
+    // Coinbase(CoinbaseBook),
     GateIo(GateIoPair),
     Huobi(HuobiTicker),
     Kraken(KrakenTickerInfo),
@@ -85,7 +92,7 @@ impl Into<NormalizedTicker> for Sample {
             Sample::Kucoin(t) => t.into(),
             Sample::Okex(t) => t.into(),
             Sample::Poloniex(t) => t.into(),
-            Sample::Coinbase(t) => t.into(),
+            // Sample::Coinbase(t) => t.into(),
             Sample::CoinbaseSpot(t) => {
                 let mut res = NormalizedTicker::default();
                 res.price = t;
@@ -97,17 +104,13 @@ impl Into<NormalizedTicker> for Sample {
 
 #[tokio::main(worker_threads = 12)]
 async fn main() {
-
     // define the abi for the callback
     // -- here it's just a function named "callback", expecting the feed names, values, and timestamps
     // -- we also include a view function for getting all feeds
     // running `npx hardhat typechain` will create artifacts for the contract
     // this in particular is found at
     // SwitchboardPushReceiver/artifacts/contracts/src/SwitchboardPushReceiver/Receiver/Receiver.sol/Receiver.json
-    abigen!(
-        Receiver,
-        "./src/abi/Receiver.json",
-    );
+    abigen!(Receiver, "./src/abi/Receiver.json",);
 
     // Generates a new enclave wallet, pulls in relevant environment variables
     let function_runner = EVMFunctionRunner::new().unwrap();
@@ -116,9 +119,10 @@ async fn main() {
     // -- this is the maximum amount of gas that can be used for the transaction (and it's a lot)
     let gas_limit = 5_500_000;
     let expiration_time_seconds = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .unwrap_or(Duration::ZERO)
-            .as_secs() + 64;
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap_or(Duration::ZERO)
+        .as_secs()
+        + 64;
 
     // setup the provider + signer
     let provider = Provider::<Http>::try_from("https://rpc.test.btcs.network").unwrap();
@@ -193,33 +197,32 @@ async fn main() {
     }
 
     // send the callback to the contract
-    let callback = receiver_contract
-        .callback(
-            feed_names.clone(),
-            feed_values.clone(),
-            expiration_time_seconds.into(),
-        );
+    let callback = receiver_contract.callback(
+        feed_names.clone(),
+        feed_values.clone(),
+        expiration_time_seconds.into(),
+    );
 
     // get the calls from the output result
     let callbacks = vec![callback];
 
     // Emit the result
-    function_runner.emit(
-        contract_address,
-        expiration_time_seconds.try_into().unwrap(),
-        gas_limit.into(),
-        callbacks,
-    ).unwrap();
+    function_runner
+        .emit(
+            contract_address,
+            expiration_time_seconds.try_into().unwrap(),
+            gas_limit.into(),
+            callbacks,
+        )
+        .unwrap();
 }
 
-
 // Get all feed data from various exchanges and return a hashmap of feed names and medianized values
-async fn get_feed_data() -> HashMap::<[u8; 32], I256> {
+async fn get_feed_data() -> HashMap<[u8; 32], I256> {
     use crate::Sample::*;
     let empty_vec: Vec<Sample> = Vec::new();
     let mut aggregates = HashMap::<Pair, Vec<Sample>>::new();
-    let binance_spot: Vec<BinanceSpot> =
-        reqwest::get("https://api.binance.us/api/v3/ticker/price")
+    let binance_spot: Vec<BinanceSpot> = reqwest::get("https://api.binance.us/api/v3/ticker/price")
         .await
         .unwrap()
         .json()
@@ -234,11 +237,11 @@ async fn get_feed_data() -> HashMap::<[u8; 32], I256> {
 
     let bitfinex_spot: Vec<Vec<Option<Value>>> =
         reqwest::get("https://api-pub.bitfinex.com/v2/tickers?symbols=ALL")
-        .await
-        .unwrap()
-        .json()
-        .await
-        .unwrap();
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap();
     let bitfinex_spot: Vec<BitfinexPair> = bitfinex_spot
         .iter()
         .map(|x| x.clone().into())
@@ -251,8 +254,7 @@ async fn get_feed_data() -> HashMap::<[u8; 32], I256> {
         aggregates.insert(p.symbol, samples.to_vec());
     }
 
-    let bittrex_spot: Vec<BittrexPair> =
-        reqwest::get("https://api.bittrex.com/v3/markets/tickers")
+    let bittrex_spot: Vec<BittrexPair> = reqwest::get("https://api.bittrex.com/v3/markets/tickers")
         .await
         .unwrap()
         .json()
@@ -267,21 +269,23 @@ async fn get_feed_data() -> HashMap::<[u8; 32], I256> {
 
     let coinbase_spot: CoinbaseSpotResponse =
         reqwest::get("https://api.coinbase.com/v2/exchange-rates?currency=USD")
-        .await
-        .unwrap()
-        .json()
-        .await
-        .unwrap();
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap();
     // println!("Coinbase markets {:#?}", coinbase_spot.data.rates);
     for (k, v) in coinbase_spot.data.rates {
-        let symbol = Pair { base: k.to_string(), quote: "USD".to_string() };
+        let symbol = Pair {
+            base: k.to_string(),
+            quote: "USD".to_string(),
+        };
         let mut samples = aggregates.get(&symbol).unwrap_or(&empty_vec).to_vec();
         samples.push(CoinbaseSpot(v.clone()));
         aggregates.insert(symbol, samples.to_vec());
     }
 
-    let gateio_spot: Vec<GateIoPair> =
-        reqwest::get("https://api.gateio.ws/api/v4/spot/tickers")
+    let gateio_spot: Vec<GateIoPair> = reqwest::get("https://api.gateio.ws/api/v4/spot/tickers")
         .await
         .unwrap()
         .json()
@@ -290,19 +294,20 @@ async fn get_feed_data() -> HashMap::<[u8; 32], I256> {
 
     // println!("Gateio markets {:#?}", gateio_spot);
     for p in gateio_spot {
-        let mut samples = aggregates.get(&p.currency_pair).unwrap_or(&empty_vec).to_vec();
+        let mut samples = aggregates
+            .get(&p.currency_pair)
+            .unwrap_or(&empty_vec)
+            .to_vec();
         samples.push(GateIo(p.clone()));
         aggregates.insert(p.currency_pair, samples.to_vec());
     }
 
-    let huobi_spot: HuobiTickerResponse =
-        reqwest::get("https://api.huobi.pro/market/tickers")
+    let huobi_spot: HuobiTickerResponse = reqwest::get("https://api.huobi.pro/market/tickers")
         .await
         .unwrap()
         .json()
         .await
         .unwrap();
-
 
     //println!("Huobi markets {:#?}", huobi_spot.data);
     for p in huobi_spot.data {
@@ -311,8 +316,7 @@ async fn get_feed_data() -> HashMap::<[u8; 32], I256> {
         aggregates.insert(p.symbol, samples.to_vec());
     }
 
-    let kraken_spot: KrakenTickerResponse =
-        reqwest::get("https://api.kraken.com/0/public/Ticker")
+    let kraken_spot: KrakenTickerResponse = reqwest::get("https://api.kraken.com/0/public/Ticker")
         .await
         .unwrap()
         .json()
@@ -328,11 +332,11 @@ async fn get_feed_data() -> HashMap::<[u8; 32], I256> {
 
     let kucoin_spot: KucoinTickerResponse =
         reqwest::get("https://api.kucoin.com/api/v1/market/allTickers")
-        .await
-        .unwrap()
-        .json()
-        .await
-        .unwrap();
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap();
     // println!("Kucoin markets {:#?}", kucoin_spot.data.ticker);
     for p in kucoin_spot.data.ticker {
         let mut samples = aggregates.get(&p.symbol).unwrap_or(&empty_vec).to_vec();
@@ -342,11 +346,11 @@ async fn get_feed_data() -> HashMap::<[u8; 32], I256> {
 
     let okex_spot: OkexSpotResponse =
         reqwest::get("https://www.okx.com/api/v5/market/tickers?instType=SPOT")
-        .await
-        .unwrap()
-        .json()
-        .await
-        .unwrap();
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap();
     // println!("okex markets {:#?}", okex_spot.data);
     for p in okex_spot.data {
         let mut samples = aggregates.get(&p.instId).unwrap_or(&empty_vec).to_vec();
@@ -356,11 +360,11 @@ async fn get_feed_data() -> HashMap::<[u8; 32], I256> {
 
     let bitstamp_spot: Vec<BitstampTicker> =
         reqwest::get("https://www.bitstamp.net/api/v2/ticker/")
-        .await
-        .unwrap()
-        .json()
-        .await
-        .unwrap();
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap();
     // println!("Bitstamp markets {:#?}", bitstamp_spot);
     for p in bitstamp_spot {
         let mut samples = aggregates.get(&p.pair).unwrap_or(&empty_vec).to_vec();
@@ -370,11 +374,11 @@ async fn get_feed_data() -> HashMap::<[u8; 32], I256> {
 
     let poloniex_spot: PoloniexResponse =
         reqwest::get("https://poloniex.com/public?command=returnTicker")
-        .await
-        .unwrap()
-        .json()
-        .await
-        .unwrap();
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap();
     // println!("Bitstamp markets {:#?}", bitstamp_spot);
     for (symbol, v) in poloniex_spot.into_inner() {
         let mut samples = aggregates.get(&symbol).unwrap_or(&empty_vec).to_vec();
@@ -390,13 +394,16 @@ async fn get_feed_data() -> HashMap::<[u8; 32], I256> {
 
     // go through each pair and calculate the average
     for (k, v) in aggregates {
-        let mut sum = 0.0;
+        let _sum = 0.0;
 
         // get the median price
-        let mut prices: Vec<Decimal> = v.iter().map(|x| {
-            let x: NormalizedTicker = (*x).clone().into();
-            x.price
-        }).collect();
+        let mut prices: Vec<Decimal> = v
+            .iter()
+            .map(|x| {
+                let x: NormalizedTicker = (*x).clone().into();
+                x.price
+            })
+            .collect();
         prices.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
         // println!("prices {:#?}", prices);
@@ -453,7 +460,6 @@ fn get_percentage_diff(a: I256, b: I256) -> Decimal {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Sample::*;
 
     #[tokio::test]
     async fn test() {

@@ -17,10 +17,10 @@ pub struct KrakenBookInternal {
 pub struct KrakenBook {
     pub result: HashMap<String, KrakenBookInternal>,
 }
-impl Into<NormalizedTicker> for KrakenBook {
-    fn into(self) -> NormalizedTicker {
+impl Into<NormalizedBook> for KrakenBook {
+    fn into(self) -> NormalizedBook {
         let book = self.result.values().next().unwrap();
-        let mut res = NormalizedTicker::default();
+        let mut res = NormalizedBook::default();
         for bid in book.bids.iter() {
             res.bids.push(NormalizedOrdersRow {
                 price: Decimal::try_from(bid.0.as_str()).unwrap(),

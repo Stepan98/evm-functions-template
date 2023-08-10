@@ -11,10 +11,10 @@ pub struct BinanceBook {
     pub bids: Vec<(String, String)>,
     pub asks: Vec<(String, String)>,
 }
-impl Into<NormalizedTicker> for BinanceBook {
-    fn into(self) -> NormalizedTicker {
+impl Into<NormalizedBook> for BinanceBook {
+    fn into(self) -> NormalizedBook {
         let book = self;
-        let mut res = NormalizedTicker::default();
+        let mut res = NormalizedBook::default();
         for bid in book.bids.iter() {
             res.bids.push(NormalizedOrdersRow {
                 price: Decimal::try_from(bid.0.as_str()).unwrap(),
