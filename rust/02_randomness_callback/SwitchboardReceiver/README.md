@@ -76,7 +76,7 @@ docker login --username <your-username> --password <your-password>
 
 ### Contract
 
-This SwitchboardPushReceiver contract acts as the ingestor of the switchboard-function in this directory to fetch all prices from major exchanges. The Switchboard Push Receiver is an example of the [ERC2535 diamond contract pattern](https://autifynetwork.com/exploring-erc-2535-the-diamond-standard-for-smart-contracts/) so it can be extended and upgraded for your needs.
+This SwitchboardReceiver contract is a minimal example of a contract producing randomness in a callback function at a scheduled interval.
 
 When you deploy this contract, it will await to be bound to a switchboard function calling into it.
 
@@ -135,7 +135,7 @@ See `scripts/create_function.ts` to create and deploy the function:
 
 ```bash
 export QUEUE_ID=0x392a3217624aC36b1EC1Cf95905D49594A4DCF64 # placeholder
-export SCHEDULE="" # no schedule
+export SCHEDULE="30 * * * * *" # 30 seconds
 export CONTAINER_NAME=switchboardlabs/test
 npx hardhat run scripts/create_function.ts  --network arbitrumTestnet # or coredaoTestnet
 ```
@@ -183,7 +183,7 @@ futures = "0.3"
 
 # at a minimum you'll need to include the following packages
 ethers = { version = "2.0.7", features = ["legacy"] } # legacy is only for networks that do not support https://eips.ethereum.org/EIPS/eip-2718
-switchboard-evm = "0.3.5"
+switchboard-evm = "0.3.9"
 ```
 
 ### Minimal Switchboard Function
@@ -192,21 +192,17 @@ main.rs
 
 ```rust
 use ethers::{
-    prelude::{abigen, SignerMiddleware, ContractCall},
+    prelude::{abigen, ContractCall, SignerMiddleware},
     providers::{Http, Provider},
-    types::{U256},
+    types::U256,
 };
 use rand;
 use std::sync::Arc;
-use std::time::{SystemTime, Duration};
-use switchboard_evm::{
-    sdk::{EVMFunctionRunner, EVMMiddleware},
-};
-
+use std::time::{Duration, SystemTime};
+use switchboard_evm::sdk::{EVMFunctionRunner, EVMMiddleware};
 
 #[tokio::main(worker_threads = 12)]
 async fn main() {
-
     // define the abi for the functions in the contract you'll be calling
     // -- here it's just a function named "callback", expecting a random u256
     abigen!(
@@ -221,27 +217,31 @@ async fn main() {
 
     // set the gas limit and expiration date
     let gas_limit = 1000000;
-    let expiration_time_seconds = 60;
-    let current_time = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .unwrap_or(Duration::ZERO)
-            .as_secs() + 64;
 
+    let expiration_time = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap_or(Duration::ZERO)
+        .as_secs()
+        + 64;
 
     // create a client, wallet and middleware. This is just so we can create the contract instance and sign the txn.
     // @TODO: update the provider to whichever network you're using
     let provider = Provider::<Http>::try_from("https://rpc.test.btcs.network").unwrap();
     let client = Arc::new(
-        SignerMiddleware::new_with_provider_chain(provider.clone(), function_runner.enclave_wallet.clone())
-            .await
-            .unwrap(),
+        SignerMiddleware::new_with_provider_chain(
+            provider.clone(),
+            function_runner.enclave_wallet.clone(),
+        )
+        .await
+        .unwrap(),
     );
 
     // @TODO: your target contract address here
-    // In the push receiver example this is set via environment variable
-    let contract_address = "0x1cEA45f047FEa89887B79ce28723852f288eE09B"
+    // get contract address from docker env
+    let contract_address = env!("SWITCHBOARD_RECEIVER_ADDRESS")
         .parse::<ethers::types::Address>()
         .unwrap();
+
     let receiver_contract = Receiver::new(contract_address, client);
 
     // generate a random number U256
@@ -249,22 +249,20 @@ async fn main() {
     let random = U256(random);
 
     // call function
-    let contract_fn_call: ContractCall<EVMMiddleware<_>, _> =
-        receiver_contract.callback(random);
+    let contract_fn_call: ContractCall<EVMMiddleware<_>, _> = receiver_contract.callback(random);
 
     // create a vec of contract calls to pass to the function runner
     let calls = vec![contract_fn_call.clone()];
 
     // Emit the result
-    // This will encode and sent the function data and run them as metatransactions
-    // (in a single-tx) originating from the switchboard contract with the functionId encoded as the sender
-    // https://eips.ethereum.org/EIPS/eip-2771
-    function_runner.emit(
-        contract_address,
-        current_time.try_into().unwrap(),
-        gas_limit.into(),
-        calls,
-    ).unwrap();
+    function_runner
+        .emit(
+            contract_address,
+            expiration_time.try_into().unwrap(),
+            gas_limit.into(),
+            calls,
+        )
+        .unwrap();
 }
 ```
 

@@ -29,7 +29,7 @@
   - [Printing Function Data](#printing-function-data)
 - [Writing Switchboard Rust Functions](#writing-switchboard-rust-functions)
   - [Setup](#setup)
-  - [Minimal Example](#minimal-switchboard-function)
+  - [Switchboard Function With Params Example](#switchboard-function-with-params-example)
   - [Testing your function](#testing-your-function)
   - [Deploying and maintenance](#deploying-and-maintenance)
 - [Writing Receiver Contracts](#writing-receiver-contracts)
@@ -76,7 +76,7 @@ docker login --username <your-username> --password <your-password>
 
 ### Contract
 
-This SwitchboardPushReceiver contract acts as the ingestor of the switchboard-function in this directory to fetch all prices from major exchanges. The Switchboard Push Receiver is an example of the [ERC2535 diamond contract pattern](https://autifynetwork.com/exploring-erc-2535-the-diamond-standard-for-smart-contracts/) so it can be extended and upgraded for your needs.
+This SwitchboardParamsReceiver is a simple Solidity contract that allows you to call a switchboard function with a set of parameters from another contract.
 
 When you deploy this contract, it will await to be bound to a switchboard function calling into it.
 
@@ -183,10 +183,14 @@ futures = "0.3"
 
 # at a minimum you'll need to include the following packages
 ethers = { version = "2.0.7", features = ["legacy"] } # legacy is only for networks that do not support https://eips.ethereum.org/EIPS/eip-2718
-switchboard-evm = "0.3.5"
+tokio = "^1"
+futures = "0.3"
+rand = "0.8.5"
+switchboard-evm = "0.3.9"
+serde_json = "1.0.64"
 ```
 
-### Minimal Switchboard Function
+### Switchboard Function with Params Example
 
 main.rs
 
@@ -237,7 +241,7 @@ async fn main() {
 
     // create a client, wallet and middleware. This is just so we can create the contract instance and sign the txn.
     // @TODO: update the provider to whichever network you're using
-    let provider = Provider::<Http>::try_from("https://rpc.test.btcs.network").unwrap();
+    let provider = Provider::<Http>::try_from("YOUR_RPC_ENDPOINT").unwrap();
     let client = Arc::new(
         SignerMiddleware::new_with_provider_chain(provider.clone(), function_runner.enclave_wallet.clone())
             .await
@@ -337,11 +341,11 @@ After you publish the function and create it on the blockchain, you must keep th
 
 While Switchboard Functions can call back into any number of on-chain functions, it's useful to limit access to some privileged functions to just _your_ Switchboard Function.
 
-In order to do this you'll need to know the switchboard address you're using, and which functionId will be calling into the function in question.
+In order to do this you'll need to know the switchboard address you're using, and which functionId will be calling into the function in question. The following example handles params generated on-chain, addressing each call individually with custom data. This is useful for handling user orders in a case where you'd want to fulfill them as quickly as possible with fresh oracle data.
 
 ### Receiver Example
 
-ISwitchboard.sol (just a simple subset of switchboard interfaces)
+ISwitchboard.sol
 
 ```solidity
 // SPDX-License-Identifier: MIT

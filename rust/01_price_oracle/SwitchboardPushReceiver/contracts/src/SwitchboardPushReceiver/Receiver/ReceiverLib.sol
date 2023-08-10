@@ -20,6 +20,7 @@ library ReceiverLib {
         uint80 latestIntervalId;
         Result latestResult; // used by default for getLatestResult
         bool historyEnabled; // by default off so we don't store all feed histories for all 500+ feeds forever
+        bool latestResultFailed;
     }
 
     struct DiamondStorage {
@@ -31,6 +32,8 @@ library ReceiverLib {
         mapping(bytes32 => Feed) feeds;
         // feed hashes created
         bytes32[] feedNames;
+        // latest timestamp
+        uint256 latestTimestamp;
     }
 
     function diamondStorage()
@@ -44,6 +47,13 @@ library ReceiverLib {
         }
     }
 
+    function failureCallback(bytes32[] memory _feedNames) internal {
+        DiamondStorage storage ds = diamondStorage();
+        for (uint256 i = 0; i < _feedNames.length; i++) {
+            ds.feeds[_feedNames[i]].latestResultFailed = true;
+        }
+    }
+
     // Switchboard Function will call this function with the feed ids and values
     function callback(
         bytes32[] memory _feedNames, // the function
@@ -52,9 +62,16 @@ library ReceiverLib {
     ) internal {
         DiamondStorage storage ds = diamondStorage();
 
+        // mark latest timestamp
+        ds.latestTimestamp = timestamp;
+
         // loop through the input arrays and set the prices
         for (uint256 i = 0; i < _feedNames.length; i++) {
             Feed storage feed = ds.feeds[_feedNames[i]];
+
+            if (feed.latestResultFailed) {
+                feed.latestResultFailed = false;
+            }
 
             // make sure address pointer exists
             if (feed.feedId == address(0)) {
@@ -134,5 +151,9 @@ library ReceiverLib {
 
     function feedIdToName(address feedId) internal view returns (bytes32) {
         return diamondStorage().feedIdToName[feedId];
+    }
+
+    function latestTimestamp() internal view returns (uint256) {
+        return diamondStorage().latestTimestamp;
     }
 }

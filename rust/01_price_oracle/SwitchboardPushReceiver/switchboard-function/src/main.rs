@@ -154,8 +154,17 @@ async fn main() {
     let mut feed_updates = get_feed_data().await;
 
     // check if we're still registering feeds (significantly more expensive in gas cost)
-    // -- if so, only use the first 30 elements of the feed_updates
-    let registering_feeds: bool = feed_map.len() < feed_updates.len() - 5;
+    // -- if so, only use the first 20 elements of the feed_updates
+    // allow up to 1 registration alongside updates so we don't block updates for an entire run if a feed is added
+    let registering_feeds: bool = feed_map.len() < feed_updates.len() - 1;
+
+    // get list of feed names that weren't received in get_feed_data
+    let mut missing_feeds = Vec::<[u8; 32]>::new();
+    for key in feed_map.keys() {
+        if !feed_updates.contains_key(key) {
+            missing_feeds.push(*key);
+        }
+    }
 
     // delete all entries with a diff less than 0.1
     for (key, value) in feed_updates.clone() {
@@ -166,6 +175,7 @@ async fn main() {
                 feed_updates.remove(&key);
             }
         }
+
     }
 
     // get a vec of feed names and values remaining
@@ -182,6 +192,7 @@ async fn main() {
     if !registering_feeds {
         feed_updates.shuffle(&mut rng);
     }
+
 
     for (key, value) in feed_updates {
         // only use the first 30 elements of the feed_updates
@@ -203,8 +214,13 @@ async fn main() {
         expiration_time_seconds.into(),
     );
 
-    // get the calls from the output result
-    let callbacks = vec![callback];
+    // add the missing feeds to the callback to mark them as stale
+    let callback_missing_feeds = receiver_contract.failure_callback(
+        missing_feeds.clone()
+    );
+
+    // get the calls from the output results
+    let callbacks = vec![callback, callback_missing_feeds];
 
     // Emit the result
     function_runner

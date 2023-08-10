@@ -16,7 +16,6 @@ contract Receiver is Recipient {
         int256[] memory values, // the value of the feed
         uint256 timestamp // data timestamp
     ) external {
-
         if (AdminLib.functionId() == address(0)) {
             AdminLib.setFunctionId(getMsgSender());
         }
@@ -30,6 +29,21 @@ contract Receiver is Recipient {
 
         // Update each feed internally
         ReceiverLib.callback(_feedNames, values, timestamp);
+    }
+
+    // Failure callback - marking latest result as failed for a feed
+    function failureCallback(
+        bytes32[] memory _feedNames // feed names
+    ) external {
+        if (AdminLib.functionId() == address(0)) {
+            AdminLib.setFunctionId(getMsgSender());
+        }
+
+        // Assert that the sender is switchboard & the correct function id is encoded
+        verifySwitchboardFunction();
+
+        // Update each feed internally
+        ReceiverLib.failureCallback(_feedNames);
     }
 
     // Deploy a Classic Push Model Adapter
@@ -70,9 +84,20 @@ contract Receiver is Recipient {
     {
         bytes32 feedName = ReceiverLib.feedIdToName(feedId);
         ReceiverLib.Feed memory feed = ReceiverLib.feeds(feedName);
+
+        if (feed.latestResultFailed) {
+            // if the latest result failed, the latest timestamp + updatedAt are the time the data
+            // was actually received
+            timestamp = feed.latestResult.startedAt;
+            updatedAt = feed.latestResult.updatedAt;
+        } else {
+            // the latest timestamp is the last time the function ensured the variance threshold
+            // was checked for the feed.
+            timestamp = ReceiverLib.latestTimestamp();
+            updatedAt = timestamp;
+        }
+
         value = feed.latestResult.value;
-        timestamp = feed.latestResult.startedAt;
-        updatedAt = feed.latestResult.updatedAt;
         intervalId = feed.latestIntervalId;
         if (intervalId == 0) {
             revert ErrorLib.FeedUninitialized(feedId);
@@ -85,6 +110,7 @@ contract Receiver is Recipient {
     // feeds - get a feed                               @NOTE: will return default values if feed doesn't exist
     // feedNames - get all feed names
     // getAllFeeds - get all feeds
+    // latestTimestamp - get the timestamp of the latest updates
 
     function results(
         bytes32 feedName,
@@ -105,5 +131,9 @@ contract Receiver is Recipient {
 
     function getAllFeeds() external view returns (ReceiverLib.Feed[] memory) {
         return ReceiverLib.getAllFeeds();
+    }
+
+    function latestTimestamp() external view returns (uint256) {
+        return ReceiverLib.latestTimestamp();
     }
 }

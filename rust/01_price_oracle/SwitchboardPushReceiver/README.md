@@ -73,6 +73,7 @@ docker login --username <your-username> --password <your-password>
 ```
 
 ### Install script dependencies
+
 ```bash
 pnpm i
 ```
@@ -129,6 +130,7 @@ export CONTAINER_NAME=your_docker_username/switchboard-function
 ```
 
 Here, set the name of your container and deploy it using:
+
 ```bash
 export CONTAINER_NAME=your_docker_username/switchboard-function
 make docker_publish
@@ -192,7 +194,7 @@ futures = "0.3"
 
 # at a minimum you'll need to include the following packages
 ethers = { version = "2.0.7", features = ["legacy"] } # legacy is only for networks that do not support https://eips.ethereum.org/EIPS/eip-2718
-switchboard-evm = "0.3.5"
+switchboard-evm = "0.3.9"
 ```
 
 ### Minimal Switchboard Function
@@ -211,7 +213,6 @@ use std::time::{SystemTime, Duration};
 use switchboard_evm::{
     sdk::{EVMFunctionRunner, EVMMiddleware},
 };
-
 
 #[tokio::main(worker_threads = 12)]
 async fn main() {
