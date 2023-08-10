@@ -124,7 +124,7 @@ async fn main() {
     // set the gas limit and expiration date
     // -- this is the maximum amount of gas that can be used for the transaction (and it's a lot)
     let gas_limit = 5_500_000;
-    let current_time = SystemTime::now()
+    let expiration_time_seconds = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap_or(Duration::ZERO)
             .as_secs() + 64;
@@ -206,7 +206,7 @@ async fn main() {
         .callback(
             feed_names.clone(),
             feed_values.clone(),
-            current_time.into(),
+            expiration_time_seconds.into(),
         );
 
     // get the calls from the output result
@@ -215,7 +215,7 @@ async fn main() {
     // Emit the result
     function_runner.emit(
         contract_address,
-        current_time.try_into().unwrap(),
+        expiration_time_seconds.try_into().unwrap(),
         gas_limit.into(),
         callbacks,
     ).unwrap();

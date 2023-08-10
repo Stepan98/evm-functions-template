@@ -36,7 +36,7 @@ async fn main() {
 
     // set the gas limit and expiration date
     let gas_limit = 1_000_000;
-    let current_time = SystemTime::now()
+    let expiration_time_seconds = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap_or(Duration::ZERO)
             .as_secs() + 64;
@@ -96,7 +96,7 @@ async fn main() {
     // @NOTE function_runner.emit will mark all call_ids as resolved
     function_runner.emit(
         contract_address,
-        current_time.try_into().unwrap(),
+        expiration_time_seconds.try_into().unwrap(),
         gas_limit.into(),
         calls,
     ).unwrap();
@@ -106,7 +106,7 @@ async fn main() {
     // 
     // function_runner.emit_resolve(
     //     contract_address,
-    //     current_time.try_into().unwrap(),
+    //     expiration_time_seconds.try_into().unwrap(),
     //     gas_limit.into(),
     //     calls,
     //     call_ids, // Vec<Address> of call_ids to resolve <--- this is the only difference

@@ -1,4 +1,0 @@
-[
-  "constructor(address,address) payable",
-  "error InitializationFunctionReverted(address,bytes)"
-]
