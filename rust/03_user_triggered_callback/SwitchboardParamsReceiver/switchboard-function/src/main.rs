@@ -76,7 +76,7 @@ async fn main() {
         })
         .map(|param| {
             // Handle each param, call_id pair
-            let (param_result, call_id) = param;
+            let (param_result, _call_id) = param;
             let param = param_result.as_ref().unwrap();
             let order_id = param.order_id;
 
