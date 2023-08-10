@@ -214,13 +214,17 @@ async fn main() {
         expiration_time_seconds.into(),
     );
 
-    // add the missing feeds to the callback to mark them as stale
-    let callback_missing_feeds = receiver_contract.failure_callback(
-        missing_feeds.clone()
-    );
-
     // get the calls from the output results
-    let callbacks = vec![callback, callback_missing_feeds];
+    let mut callbacks = vec![callback, callback_missing_feeds];
+
+    // add the missing feeds to the callback to mark them as stale
+    if (!registering_feeds && missing_feeds.len() > 0) {
+        let callback_missing_feeds = receiver_contract.failure_callback(
+            missing_feeds.clone()
+        );
+        callbacks.push(callback_missing_feeds);
+    }
+
 
     // Emit the result
     function_runner
