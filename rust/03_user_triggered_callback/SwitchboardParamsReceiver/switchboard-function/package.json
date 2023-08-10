@@ -1,9 +1,8 @@
 {
-  "name": "solana-liquidity-oracle-function",
+  "name": "solana-randomness-callback-function",
   "scripts": {
-    "build:function": "make"
+    "build:cargo": "make",
+    "fix": "cargo fmt"
   },
-  "dependencies": {
-    "solana-liquidity-oracle": "workspace:*"
-  }
+  "dependencies": {}
 }

@@ -6,6 +6,7 @@ async function main() {
 
   const diamondAddress =
     process.env.SWITCHBOARD_ADDRESS ?? process.env.DIAMOND_ADDRESS ?? "";
+  const functionId = process.env.FUNCTION_ID ?? "";
 
   if (!diamondAddress) {
     throw new Error(
@@ -13,36 +14,19 @@ async function main() {
     );
   }
 
-  const functionId = process.env.FUNCTION_ID ?? "";
   if (!functionId) {
     throw new Error("Please set the function id with: export FUNCTION_ID=...");
   }
 
-  const ethValue = process.env.ETH_VALUE ?? "";
-  if (!ethValue) {
-    throw new Error("Please set the eth value with: export ETH_VALUE=...");
-  }
-
-  console.log(
-    "Extending the function with account:",
-    await deployer.getAddress()
-  );
-
+  console.log("Account:", deployer.address);
   console.log("Account balance:", (await deployer.getBalance()).toString());
-
   const switchboardProgram = await SwitchboardProgram.load(
     deployer,
     diamondAddress
   );
 
-  // FUND FUNCTION
-  const tx = await switchboardProgram.sb.functionEscrowFund(functionId, {
-    value: ethers.utils.parseEther(ethValue),
-  });
-
-  // WAIT FOR TX
-  const receipt = await tx.wait();
-  console.log(receipt);
+  const func = await switchboardProgram.sb.funcs(functionId);
+  console.log(func);
 }
 
 main()

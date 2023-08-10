@@ -1,25 +1,18 @@
+[workspace]
+
 [package]
-name = "basic-oracle-function"
+name = "randomness-function"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "basic-oracle-function"
+name = "randomness-function"
 path = "src/main.rs"
 
 [dependencies]
 tokio = "^1"
 futures = "0.3"
-serde = "^1"
-serde_json = "^1"
-switchboard-utils = { version = "0.8.0" }
 ethers = { version = "2.0.7", features = ["legacy"] }
 rand = "0.8.5"
-switchboard-common = "0.8.6"
-switchboard-evm = "0.3.3"
-bytemuck = "1.13.1"
-rust_decimal = "1.30.0"
-
-[dev-dependencies]
-env_logger = "0.10"
-test-log = "0.2.12"
+switchboard-evm = "0.3.9"
+serde_json = "1.0.64"

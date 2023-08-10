@@ -1,1 +1,3 @@
-target
+target/
+Makefile
+README.md

@@ -11,7 +11,9 @@ export async function deployDiamond() {
   const accounts = await ethers.getSigners();
   const contractOwner = accounts[0];
 
-  let switchboardAddress = process.env.SWITCHBOARD_ADDRESS ?? "";
+  let switchboardAddress =
+    process.env.SWITCHBOARD_ADDRESS ?? process.env.DIAMOND_ADDRESS ?? "";
+
   let diamondAddress = process.env.SWITCHBOARD_PUSH_ADDRESS ?? "";
 
   if (!switchboardAddress) {

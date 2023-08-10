@@ -136,7 +136,7 @@ See `scripts/create_function.ts` to create and deploy the function:
 ```bash
 export QUEUE_ID=0x392a3217624aC36b1EC1Cf95905D49594A4DCF64 # placeholder
 export SCHEDULE="30 * * * * *" # every 30 seconds
-export CONTAINER=switchboardlabs/test
+export CONTAINER_NAME=switchboardlabs/test
 npx hardhat run scripts/create_function.ts  --network arbitrumTestnet # or coredaoTestnet
 ```
 
@@ -345,15 +345,17 @@ contract ReceiverExample is Recipient {
   event NewRandomValue(uint256 value);
 
   constructor(
-    address _switchboard, // Switchboard contract address
-    address _functionId // Function id corresponding to the randomness function oracle
-  ) Recipient(_switchboard) {
-    functionId = _functionId;
-  }
+    address _switchboard // Switchboard contract address
+  ) Recipient(_switchboard) {}
 
   function callback(uint256 value) external {
     // extract the sender from the callback, this validates that the switchboard contract called this function
     address msgSender = getMsgSender();
+
+    if (functionId == address(0)) {
+      // set the functionId if it hasn't been set yet
+      functionId = msgSender;
+    }
 
     // make sure the encoded caller is our function id
     if (msgSender != functionId) {

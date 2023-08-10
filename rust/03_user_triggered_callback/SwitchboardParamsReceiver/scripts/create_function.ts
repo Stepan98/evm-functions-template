@@ -28,7 +28,7 @@ async function main() {
 
   if (!container) {
     throw new Error(
-      'Please set the container, ex: export CONTAINER_NAME="switchboardlabs/price-oracle"'
+      'Please set the container, ex: export CONTAINER="switchboardlabs/price-oracle"'
     );
   }
 
