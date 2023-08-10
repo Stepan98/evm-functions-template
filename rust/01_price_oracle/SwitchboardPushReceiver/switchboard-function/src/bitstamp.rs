@@ -24,10 +24,10 @@ pub struct BitstampTicker {
     pub pair: Pair,
 }
 
-impl Into<NormalizedBook> for BitstampTicker {
-    fn into(self) -> NormalizedBook {
+impl Into<NormalizedTicker> for BitstampTicker {
+    fn into(self) -> NormalizedTicker {
         let book = self;
-        let mut res = NormalizedBook::default();
+        let mut res = NormalizedTicker::default();
         res.price = book.last;
         res
     }

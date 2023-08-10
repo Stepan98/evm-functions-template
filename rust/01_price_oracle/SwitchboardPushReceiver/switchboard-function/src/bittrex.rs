@@ -15,10 +15,10 @@ pub struct BittrexPair {
     pub updatedAt: String,
 }
 
-impl Into<NormalizedBook> for BittrexPair {
-    fn into(self) -> NormalizedBook {
+impl Into<NormalizedTicker> for BittrexPair {
+    fn into(self) -> NormalizedTicker {
         let book = self;
-        let mut res = NormalizedBook::default();
+        let mut res = NormalizedTicker::default();
         res.price = book.lastTradeRate;
         res
     }

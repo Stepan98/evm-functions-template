@@ -11,10 +11,10 @@ pub struct BinanceBook {
     pub bids: Vec<(String, String)>,
     pub asks: Vec<(String, String)>,
 }
-impl Into<NormalizedBook> for BinanceBook {
-    fn into(self) -> NormalizedBook {
+impl Into<NormalizedTicker> for BinanceBook {
+    fn into(self) -> NormalizedTicker {
         let book = self;
-        let mut res = NormalizedBook::default();
+        let mut res = NormalizedTicker::default();
         for bid in book.bids.iter() {
             res.bids.push(NormalizedOrdersRow {
                 price: Decimal::try_from(bid.0.as_str()).unwrap(),
@@ -60,10 +60,10 @@ pub struct BinanceTicker {
     pub openTime: i64,
     pub closeTime: i64,
 }
-// impl Into<NormalizedBook> for BinanceBook {
-// fn into(self) -> NormalizedBook {
+// impl Into<NormalizedTicker> for BinanceBook {
+// fn into(self) -> NormalizedTicker {
 // let book = self;
-// let mut res = NormalizedBook::default();
+// let mut res = NormalizedTicker::default();
 // for bid in book.bids.iter() {
 // res.bids.push(NormalizedOrdersRow {
 // price: Decimal::try_from(bid.0.as_str()).unwrap(),
@@ -92,10 +92,10 @@ pub struct BinanceSpot {
     pub price: Decimal,
 }
 
-impl Into<NormalizedBook> for BinanceSpot {
-    fn into(self) -> NormalizedBook {
+impl Into<NormalizedTicker> for BinanceSpot {
+    fn into(self) -> NormalizedTicker {
         let book = self;
-        let mut res = NormalizedBook::default();
+        let mut res = NormalizedTicker::default();
         res.price = book.price;
         res
     }

@@ -29,10 +29,10 @@ pub struct KucoinTicker {
     pub makerCoefficient: Decimal,
 }
 
-impl Into<NormalizedBook> for KucoinTicker {
-    fn into(self) -> NormalizedBook {
+impl Into<NormalizedTicker> for KucoinTicker {
+    fn into(self) -> NormalizedTicker {
         let book = self;
-        let mut res = NormalizedBook::default();
+        let mut res = NormalizedTicker::default();
         if let Some(avg) = book.averagePrice {
             res.price = Decimal::from_str(&avg.to_string()).unwrap_or(book.last);
         }

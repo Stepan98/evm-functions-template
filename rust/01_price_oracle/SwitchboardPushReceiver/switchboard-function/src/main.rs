@@ -51,18 +51,9 @@ use rand::seq::SliceRandom;
 use std::sync::Arc;
 use std::time::{SystemTime, Duration};
 
-
 #[allow(non_snake_case)]
 #[derive(Deserialize, Default, Clone, Debug)]
-pub struct NormalizedOrdersRow {
-    price: Decimal,
-    amount: Decimal,
-}
-#[allow(non_snake_case)]
-#[derive(Deserialize, Default, Clone, Debug)]
-pub struct NormalizedBook {
-    pub bids: Vec<NormalizedOrdersRow>,
-    pub asks: Vec<NormalizedOrdersRow>,
+pub struct NormalizedTicker {
     pub price: Decimal,
 }
 #[derive(Debug, Clone)]
@@ -81,8 +72,8 @@ enum Sample {
     CoinbaseSpot(Decimal),
 }
 
-impl Into<NormalizedBook> for Sample {
-    fn into(self) -> NormalizedBook {
+impl Into<NormalizedTicker> for Sample {
+    fn into(self) -> NormalizedTicker {
         match self {
             Sample::Binance(t) => t.into(),
             Sample::Bitfinex(t) => t.into(),
@@ -96,7 +87,7 @@ impl Into<NormalizedBook> for Sample {
             Sample::Poloniex(t) => t.into(),
             Sample::Coinbase(t) => t.into(),
             Sample::CoinbaseSpot(t) => {
-                let mut res = NormalizedBook::default();
+                let mut res = NormalizedTicker::default();
                 res.price = t;
                 res
             }
@@ -403,7 +394,7 @@ async fn get_feed_data() -> HashMap::<[u8; 32], I256> {
 
         // get the median price
         let mut prices: Vec<Decimal> = v.iter().map(|x| {
-            let x: NormalizedBook = (*x).clone().into();
+            let x: NormalizedTicker = (*x).clone().into();
             x.price
         }).collect();
         prices.sort_by(|a, b| a.partial_cmp(b).unwrap());

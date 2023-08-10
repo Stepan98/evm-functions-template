@@ -34,10 +34,10 @@ pub struct HuobiTickerResponse {
     pub data: Vec<HuobiTicker>,
 }
 
-impl Into<NormalizedBook> for HuobiTicker {
-    fn into(self) -> NormalizedBook {
+impl Into<NormalizedTicker> for HuobiTicker {
+    fn into(self) -> NormalizedTicker {
         let book = self;
-        let mut res = NormalizedBook::default();
+        let mut res = NormalizedTicker::default();
         res
     }
 }
