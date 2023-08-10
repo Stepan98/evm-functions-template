@@ -5,7 +5,6 @@ use crate::*;
 pub use switchboard_utils::reqwest;
 
 use serde::Deserialize;
-use serde::Serialize;
 
 // https://api.huobi.pro/market/tickers
 #[derive(Deserialize, Debug, Clone)]
@@ -34,10 +33,10 @@ pub struct HuobiTickerResponse {
     pub data: Vec<HuobiTicker>,
 }
 
-impl Into<NormalizedBook> for HuobiTicker {
-    fn into(self) -> NormalizedBook {
-        let book = self;
-        let mut res = NormalizedBook::default();
+impl Into<NormalizedTicker> for HuobiTicker {
+    fn into(self) -> NormalizedTicker {
+        let _book = self;
+        let res = NormalizedTicker::default();
         res
     }
 }

@@ -72,6 +72,11 @@ You'll need to login to docker. If you don't yet have an account, you'll need on
 docker login --username <your-username> --password <your-password>
 ```
 
+### Install script dependencies
+```bash
+pnpm i
+```
+
 ## Components
 
 ### Contract
@@ -112,7 +117,7 @@ The bulk of the function logic can be found in [./switchboard-function/src/main.
 Build functions from the `switchboard-function/` directory with
 
 ```bash
-make build
+make docker_build
 ```
 
 ### Publishing and Initialization
@@ -123,7 +128,11 @@ You'll also need to pick a container name that your switchboard function will us
 export CONTAINER_NAME=your_docker_username/switchboard-function
 ```
 
-Here, set the name of your container to deploy and run `make build`
+Here, set the name of your container and deploy it using:
+```bash
+export CONTAINER_NAME=your_docker_username/switchboard-function
+make docker_publish
+```
 
 After this is published, you are free to make your function account to set the rate of run for the function.
 
@@ -152,7 +161,7 @@ npx hardhat run scripts/extend_function.ts  --network arbitrumTestnet
 
 ### Printing Function Data
 
-Now view your function config to endure it is to your liking:
+Now view your function config to ensure it is to your liking:
 
 ```bash
 export FUNCTION_ID=0x96cE076e3Dda35679316b12F2b5F7b4A92C9a294

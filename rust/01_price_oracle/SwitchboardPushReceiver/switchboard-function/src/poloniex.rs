@@ -21,10 +21,10 @@ pub struct PoloniexTicker {
     pub low24hr: Decimal,
 }
 
-impl Into<NormalizedBook> for PoloniexTicker {
-    fn into(self) -> NormalizedBook {
+impl Into<NormalizedTicker> for PoloniexTicker {
+    fn into(self) -> NormalizedTicker {
         let book = self;
-        let mut res = NormalizedBook::default();
+        let mut res = NormalizedTicker::default();
         res.price = book.last;
         res
     }

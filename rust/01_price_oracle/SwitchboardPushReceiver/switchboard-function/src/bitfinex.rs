@@ -22,10 +22,10 @@ pub struct BitfinexPair {
     pub low: Decimal,
 }
 
-impl Into<NormalizedBook> for BitfinexPair {
-    fn into(self) -> NormalizedBook {
+impl Into<NormalizedTicker> for BitfinexPair {
+    fn into(self) -> NormalizedTicker {
         let book = self;
-        let mut res = NormalizedBook::default();
+        let mut res = NormalizedTicker::default();
         res.price = book.last_price;
         res
     }
@@ -34,7 +34,7 @@ impl Into<NormalizedBook> for BitfinexPair {
 impl From<Vec<Option<Value>>> for BitfinexPair {
     fn from(data: Vec<Option<Value>>) -> Self {
         let mut symbol: String = data[0].clone().unwrap().as_str().unwrap().into();
-        let mut pair = Pair {
+        let _pair = Pair {
             base: symbol.clone().into(),
             quote: "".to_string(),
         };

@@ -67,10 +67,10 @@ pub struct KrakenTickerInfo {
     pub open: Decimal,
 }
 
-impl Into<NormalizedBook> for KrakenTickerInfo {
-    fn into(self) -> NormalizedBook {
+impl Into<NormalizedTicker> for KrakenTickerInfo {
+    fn into(self) -> NormalizedTicker {
         let book = self;
-        let mut res = NormalizedBook::default();
+        let mut res = NormalizedTicker::default();
         res.price = book.vwap[0];
         res
     }

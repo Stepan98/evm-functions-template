@@ -21,10 +21,10 @@ pub struct GateIoPair {
     pub low_24h: Decimal,
 }
 
-impl Into<NormalizedBook> for GateIoPair {
-    fn into(self) -> NormalizedBook {
+impl Into<NormalizedTicker> for GateIoPair {
+    fn into(self) -> NormalizedTicker {
         let book = self;
-        let mut res = NormalizedBook::default();
+        let mut res = NormalizedTicker::default();
         res.price = book.last;
         res
     }

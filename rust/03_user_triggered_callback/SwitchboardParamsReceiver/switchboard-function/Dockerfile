@@ -17,7 +17,7 @@ RUN rustup override set stable
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETPLATFORM} --mount=type=cache,target=target,id=${TARGETPLATFORM} \
     cargo build --release && \
     cargo strip && \
-    mv target/release/basic-oracle-function /sgx/app
+    mv target/release/randomness-function /sgx/app
 
 FROM switchboardlabs/sgx-function:main
 
