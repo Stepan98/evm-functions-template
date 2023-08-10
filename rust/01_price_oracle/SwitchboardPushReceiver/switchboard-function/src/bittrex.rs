@@ -19,7 +19,7 @@ impl Into<NormalizedTicker> for BittrexPair {
     fn into(self) -> NormalizedTicker {
         let book = self;
         let mut res = NormalizedTicker::default();
-        res.price = book.lastTradeRate;
+        res.price = (book.bidRate + book.askRate) / Decimal::from(2);
         res
     }
 }

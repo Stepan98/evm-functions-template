@@ -215,10 +215,10 @@ async fn main() {
     );
 
     // get the calls from the output results
-    let mut callbacks = vec![callback, callback_missing_feeds];
+    let mut callbacks = vec![callback];
 
     // add the missing feeds to the callback to mark them as stale
-    if (!registering_feeds && missing_feeds.len() > 0) {
+    if !registering_feeds && missing_feeds.len() > 0 {
         let callback_missing_feeds = receiver_contract.failure_callback(
             missing_feeds.clone()
         );
@@ -294,6 +294,10 @@ async fn get_feed_data() -> HashMap<[u8; 32], I256> {
             .json()
             .await
             .unwrap();
+
+    // println!("Coinbase markets {:#?}", coinbase_spot);
+    // std::process::exit(1);
+
     // println!("Coinbase markets {:#?}", coinbase_spot.data.rates);
     for (k, v) in coinbase_spot.data.rates {
         let symbol = Pair {
@@ -301,7 +305,7 @@ async fn get_feed_data() -> HashMap<[u8; 32], I256> {
             quote: "USD".to_string(),
         };
         let mut samples = aggregates.get(&symbol).unwrap_or(&empty_vec).to_vec();
-        samples.push(CoinbaseSpot(v.clone()));
+        samples.push(CoinbaseSpot(Decimal::from(1) / v.clone()));
         aggregates.insert(symbol, samples.to_vec());
     }
 
@@ -420,13 +424,12 @@ async fn get_feed_data() -> HashMap<[u8; 32], I256> {
         let mut prices: Vec<Decimal> = v
             .iter()
             .map(|x| {
-                let x: NormalizedTicker = (*x).clone().into();
-                x.price
+                let normalized: NormalizedTicker = (*x).clone().into();
+                normalized.price
             })
             .collect();
         prices.sort_by(|a, b| a.partial_cmp(b).unwrap());
-
-        // println!("prices {:#?}", prices);
+        
         let mut median: Decimal;
 
         // handle even and odd cases
@@ -439,9 +442,51 @@ async fn get_feed_data() -> HashMap<[u8; 32], I256> {
 
         // get pair name as string
         let name = format!("{}/{}", k.base, k.quote);
+        
+        // get mean 
+        let sum: Decimal = prices.iter().sum();
+        let count = Decimal::from(prices.len() as i32);
+        let mean = sum / count;
 
-        // print name, price
-        // println!("{} ${}", name, median);
+        // get variance 
+        let squared_deviations: Decimal = prices
+            .iter()
+            .map(|&x| (x - mean).powi(2))
+            .sum();
+        let variance = squared_deviations / count;
+
+        // get standard deviation
+        let std_dev = variance.sqrt().unwrap();
+
+        // filter out prices that are not within 1 std dev of the mean
+        let prices = if prices.len() > 3 {
+            prices
+                .iter()
+                .filter(|x| {
+                    let lower_bound = median - std_dev;
+                    let upper_bound = median + std_dev;
+                    let x_is_in_range = x > &&lower_bound && x < &&upper_bound;
+                    // for debugging:
+                    // if !x_is_in_range {
+                    //     // get index in prices
+                    //     println!("Feed Name {},  {} is not in range {} - {}", name, x, lower_bound, upper_bound);
+                    // }
+                    x_is_in_range
+                })
+                .map(|x| *x)
+                .collect()
+        } else {
+            prices
+        };
+
+        // recalculate median
+        if prices.len() % 2 == 0 {
+            let mid = prices.len() / 2;
+            median = (prices[mid] + prices[mid - 1]) / Decimal::from(2);
+        } else {
+            median = prices[prices.len() / 2];
+        }
+
 
         // add to vectors
         let mut bytes32 = [0u8; 32];
@@ -459,22 +504,10 @@ async fn get_feed_data() -> HashMap<[u8; 32], I256> {
     feed_map
 }
 
-// Get % difference between a and b
-// where A > B (will swap if B > A)
-// (A / B - 1) * 100
-// ex: 5 / 4 = 1.25 - 1 = 0.25 * 100 = 25.00%
-// TODO: maybe use Decimal instead of I256
 fn get_percentage_diff(a: I256, b: I256) -> Decimal {
-    let diff = if a > b {
-        let a = a * I256::from(10000);
-        let diff = a / b;
-        diff
-    } else {
-        let b = b * I256::from(10000);
-        let diff = b / a;
-        diff
-    };
-    (Decimal::from(diff.as_i64()) / Decimal::from(10000) - Decimal::from(1)) * Decimal::from(100)
+    let a = Decimal::from(a.as_i128());
+    let b = Decimal::from(b.as_i128());
+    (Decimal::min(a, b) / Decimal::max(a, b)).abs()
 }
 
 #[cfg(test)]

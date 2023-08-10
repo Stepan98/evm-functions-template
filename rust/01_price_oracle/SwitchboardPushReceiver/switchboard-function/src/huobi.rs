@@ -35,8 +35,12 @@ pub struct HuobiTickerResponse {
 
 impl Into<NormalizedTicker> for HuobiTicker {
     fn into(self) -> NormalizedTicker {
-        let _book = self;
-        let res = NormalizedTicker::default();
+        let mut res = NormalizedTicker::default();
+        let ask_size_clone = self.askSize.clone(); // Clone the askSize value
+                                                   // Calculate average between bid and ask scaled by size
+        let avg_price =
+            (self.bid * self.bidSize + self.ask * ask_size_clone) / (self.bidSize + ask_size_clone);
+        res.price = Decimal::from_f64(avg_price).unwrap();
         res
     }
 }
