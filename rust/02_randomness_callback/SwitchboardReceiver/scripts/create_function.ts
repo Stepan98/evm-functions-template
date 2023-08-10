@@ -11,6 +11,10 @@ async function main() {
   const container = process.env.CONTAINER_NAME;
   const queueId = process.env.QUEUE_ID;
   const ethValue = process.env.ETH_VALUE ?? "0.1";
+
+  // empty permittedCallers can be called by anyone (default)
+  const permittedCallers = process.env.PERMITTED_CALLERS ? process.env.PERMITTED_CALLERS.split(',') : [];
+
   let functionId =
     process.env.FUNCTION_ID ?? ethers.Wallet.createRandom().address;
 
@@ -54,6 +58,7 @@ async function main() {
       container: container!,
       schedule: schedule!,
       version: "latest",
+      permittedCallers: 
     },
     { value: ethers.utils.parseEther(ethValue) }
   );

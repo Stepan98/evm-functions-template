@@ -137,6 +137,8 @@ See `scripts/create_function.ts` to create and deploy the function:
 export QUEUE_ID=0x392a3217624aC36b1EC1Cf95905D49594A4DCF64 # placeholder
 export SCHEDULE="" # no schedule
 export CONTAINER_NAME=switchboardlabs/test
+export ETH_VALUE="0.1" # initiallly fund it with 0.1 ETH
+export PERMITTED_CALLERS="0x392a3217624aC36b1EC1Cf95905D49594A4DCF64,0x392a3217624aC36b1EC1Cf95905D49594A4DCF64" # comma separated list of permitted callers (any address can call if empty)
 npx hardhat run scripts/create_function.ts  --network arbitrumTestnet # or coredaoTestnet
 ```
 
