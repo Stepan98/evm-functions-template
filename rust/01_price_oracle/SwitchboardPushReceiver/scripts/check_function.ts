@@ -1,26 +1,22 @@
 import { ethers } from "hardhat";
-import { SwitchboardProgram, FunctionAccount } from "@switchboard-xyz/evm.js";
-import * as yargs from "yargs/yargs";
-
-const argv = yargs(process.argv).options({
-  functionId: {
-    type: "string",
-    describe: "Function Address",
-    demand: false,
-    default: null,
-  },
-}).argv;
+import { SwitchboardProgram } from "@switchboard-xyz/evm.js";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
-  const diamondAddress = process.env.SWITCHBOARD_ADDRESS ?? "";
+
+  const diamondAddress =
+    process.env.SWITCHBOARD_ADDRESS ?? process.env.DIAMOND_ADDRESS ?? "";
+  const functionId = process.env.FUNCTION_ID ?? "";
+
   if (!diamondAddress) {
     throw new Error(
       "Please set the diamond address with: export SWITCHBOARD_ADDRESS=..."
     );
   }
 
-  const functionId = argv.functionId!;
+  if (!functionId) {
+    throw new Error("Please set the function id with: export FUNCTION_ID=...");
+  }
 
   console.log("Account:", deployer.address);
   console.log("Account balance:", (await deployer.getBalance()).toString());

@@ -16,7 +16,7 @@ switchboard-utils = { version = "0.8.0" }
 ethers = { version = "2.0.7", features = ["legacy"] }
 rand = "0.8.5"
 switchboard-common = "0.8.6"
-switchboard-evm = "0.3.3"
+switchboard-evm = "0.3.8"
 bytemuck = "1.13.1"
 rust_decimal = "1.30.0"
 

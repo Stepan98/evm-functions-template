@@ -1,21 +1,5 @@
 import { ethers } from "hardhat";
-import { SwitchboardProgram, FunctionAccount } from "@switchboard-xyz/evm.js";
-import * as yargs from "yargs/yargs";
-
-const argv = yargs(process.argv).options({
-  functionId: {
-    type: "string",
-    describe: "Function Address",
-    demand: false,
-    default: null,
-  },
-  eth: {
-    type: "string",
-    describe: "eth",
-    demand: false,
-    default: "0",
-  },
-}).argv;
+import { SwitchboardProgram } from "@switchboard-xyz/evm.js";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -27,7 +11,15 @@ async function main() {
     );
   }
 
-  const functionId = argv.functionId!;
+  const functionId = process.env.FUNCTION_ID ?? "";
+  if (!functionId) {
+    throw new Error("Please set the function id with: export FUNCTION_ID=...");
+  }
+
+  const ethValue = process.env.ETH_VALUE ?? "";
+  if (!ethValue) {
+    throw new Error("Please set the eth value with: export ETH_VALUE=...");
+  }
 
   console.log(
     "Extending the function with account:",
@@ -43,7 +35,7 @@ async function main() {
 
   // FUND FUNCTION
   const tx = await switchboardProgram.sb.functionEscrowFund(functionId, {
-    value: ethers.utils.parseEther(argv.eth),
+    value: ethers.utils.parseEther(ethValue),
   });
 
   // WAIT FOR TX

@@ -431,7 +431,7 @@ async fn get_feed_data() -> HashMap::<[u8; 32], I256> {
 
         // get median with fixed decimals at 18 as I256
         median.rescale(18);
-        let median = I256::from_dec_str(median.mantissa()).unwrap();
+        let median = I256::from(median.mantissa());
 
         // add to map
         feed_map.insert(bytes32, median);
