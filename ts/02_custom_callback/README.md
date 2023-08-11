@@ -31,7 +31,7 @@
     - [Initializing the function](#initializing-the-function)
     - [Adding Funding to Function](#adding-funding-to-function)
     - [Printing Function Data](#printing-function-data)
-  - [Writing Switchboard Rust Functions](#writing-switchboard-rust-functions)
+  - [Writing Switchboard TS Functions](#writing-switchboard-ts-functions)
     - [Setup](#setup)
     - [Minimal Switchboard Function](#minimal-switchboard-function)
     - [Testing your function](#testing-your-function)
@@ -165,7 +165,7 @@ export FUNCTION_ID=0x96cE076e3Dda35679316b12F2b5F7b4A92C9a294
 npx hardhat run scripts/check_function.ts  --network arbitrumTestnet
 ```
 
-## Writing Switchboard Rust Functions
+## Writing Switchboard TS Functions
 
 In order to write a successfully running switchboard function, you'll need to import `@switchboard-xyz/evm.js` to use the libraries which communicate the function results (which includes transactions to run) to the Switchboard Verifiers that execute these metatransactions.
 
