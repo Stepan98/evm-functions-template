@@ -42,20 +42,24 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
     openssl \
     libssl-dev
 
-# 
+# Install deps
+RUN apt-get update
+RUN apt-get upgrade -y
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
+RUN apt-get install -y \
+    git \ 
+    nodejs 
 
 # Setup PNPM
 RUN npm i -g pnpm
 
 # Setup Application
 WORKDIR /root/app
-COPY packages/* packages/
-COPY package.json pnpm-workspace.yaml ./
+COPY ./* ./
+COPY ./src/ ./src/
 RUN rm -rf node_modules/
-RUN pnpm install -r
 RUN mkdir -p /root/app/dist/
-WORKDIR /root/app
-RUN pnpm install -r
+RUN pnpm install
 RUN pnpm build
 
 WORKDIR /root/app
@@ -72,11 +76,7 @@ ENV SWITCHBOARD_RECEIVER_ADDRESS=$SWITCHBOARD_RECEIVER_ADDRESS
 
 # Copy the binary
 WORKDIR /sgx
-COPY ./config/app.manifest.template /sgx/app.manifest.template
-
-RUN gramine-sgx-gen-private-key
-RUN gramine-manifest app.manifest.template > app.manifest
-RUN gramine-sgx-sign --manifest app.manifest --output app.manifest.sgx
+COPY ./configs/app.manifest.template /sgx/app.manifest.template
 
 # Get the measurement from the enclave
 RUN /get_measurement.sh

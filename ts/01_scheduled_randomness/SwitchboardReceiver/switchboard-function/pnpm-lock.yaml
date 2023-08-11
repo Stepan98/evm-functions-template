@@ -20,6 +20,9 @@ dependencies:
   node-fetch:
     specifier: ^2.1.6
     version: 2.2.0
+  typescript:
+    specifier: ^5.1.6
+    version: 5.1.6
 
 devDependencies:
   '@types/big.js':
@@ -1500,6 +1503,12 @@ packages:
       strip-bom: 3.0.0
     dev: true
     optional: true
+
+  /typescript@5.1.6:
+    resolution: {integrity: sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+    dev: false
 
   /utf-8-validate@5.0.10:
     resolution: {integrity: sha512-Z6czzLq4u8fPOyx7TU6X3dvUZVvoJmxSQ+IcrlmagKhilxlhZgxPK6C5Jqbkw1IDUmFTM+cz9QDnnLTwDz/2gQ==}

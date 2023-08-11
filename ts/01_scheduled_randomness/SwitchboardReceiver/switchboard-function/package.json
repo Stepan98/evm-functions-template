@@ -13,14 +13,15 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "pnpm exec tsc"
+    "build": "tsc"
   },
   "dependencies": {
     "@switchboard-xyz/evm.js": "^3.12.11",
     "chalk": "^5.0.1",
     "ethers": "^5.7.2",
     "js-sha3": "^0.8.0",
-    "node-fetch": "^2.1.6"
+    "node-fetch": "^2.1.6",
+    "typescript": "^5.1.6"
   },
   "devDependencies": {
     "@types/big.js": "^6.1.6",
