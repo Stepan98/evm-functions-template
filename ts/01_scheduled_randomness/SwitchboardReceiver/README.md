@@ -3,7 +3,7 @@
 <div align="center">
   <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
 
-  <h1>Switchboard<br>EVM Functions Template</h1>
+  <h1>Switchboard<br>TS Functions Template</h1>
 
   <p>
     <a href="https://discord.gg/switchboardxyz">
@@ -15,29 +15,37 @@
   </p>
 </div>
 
-## Table of Content
+## Table of Contents
 
-- [Prerequisites](#prerequisites)
-  - [Installing Docker](#installing-docker)
-  - [Docker Setup](#docker-setup)
-  - [Build and Push](#build-and-push)
-- [Components](#components)
-  - [Contract](#contract)
-  - [Switchboard Function](#switchboard-function)
-  - [Publishing and Initialization](#publishing-and-initialization)
-  - [Adding Funding to Function](#adding-funding-to-function)
-  - [Printing Function Data](#printing-function-data)
-- [Writing Switchboard Rust Functions](#writing-switchboard-rust-functions)
-  - [Setup](#setup)
-  - [Minimal Example](#minimal-switchboard-function)
-  - [Testing your function](#testing-your-function)
-  - [Deploying and maintenance](#deploying-and-maintenance)
-- [Writing Receiver Contracts](#writing-receiver-contracts)
-  - [Receiver Example](#receiver-example)
+- [Switchboard Receiver](#switchboard-receiver)
+  - [Table of Contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
+    - [Node.js and Npm](#nodejs-and-npm)
+    - [Installing Docker](#installing-docker)
+    - [Docker Setup](#docker-setup)
+  - [Components](#components)
+    - [Contract](#contract)
+      - [Picking a network and setting up your environment](#picking-a-network-and-setting-up-your-environment)
+    - [Switchboard Function](#switchboard-function)
+    - [Publishing and Initialization](#publishing-and-initialization)
+    - [Initializing the function](#initializing-the-function)
+    - [Adding Funding to Function](#adding-funding-to-function)
+    - [Printing Function Data](#printing-function-data)
+  - [Writing Switchboard TS Functions](#writing-switchboard-ts-functions)
+    - [Setup](#setup)
+    - [Minimal Switchboard Function](#minimal-switchboard-function)
+    - [Testing your function](#testing-your-function)
+    - [Deploying and Maintenance](#deploying-and-maintenance)
+  - [Writing Receiver Contracts](#writing-receiver-contracts)
+    - [Receiver Example](#receiver-example)
 
 ## Prerequisites
 
-Before you can build and run the project, you'll need to have Docker installed on your system. Docker allows you to package and distribute applications as lightweight containers, making it easy to manage dependencies and ensure consistent behavior across different environments. Switchboard Functions are built and run within containers, so you'll need a docker daemon running to publish a new function.
+Before you can build and run the project, you'll need to have Node.js and npm installed on your system. You'll also need to have Docker installed on your system. Docker allows you to package and distribute applications as lightweight containers, making it easy to manage dependencies and ensure consistent behavior across different environments. Switchboard Functions are built and run within containers, so you'll need a docker daemon running to publish a new function.
+
+### Node.js and Npm
+
+If you don't have Node.js and npm installed, you can download and install them from the official Node.js website: [https://nodejs.org/](https://nodejs.org/)
 
 ### Installing Docker
 
@@ -105,9 +113,9 @@ export SWITCHBOARD_RECEIVER_ADDRESS=<RECEIVER_ADDRESS>
 
 ### Switchboard Function
 
-Export the address to your environment and navigate to `./switchboard-function/`
+Export the address to your environment and navigate to `switchboard-function/`
 
-The bulk of the function logic can be found in [./switchboard-function/src/main.rs](switchboard-function/src/main.rs).
+The bulk of the function logic can be found in [./switchboard-function/src/index.ts](switchboard-function/src/index.ts).
 
 Build functions from the `switchboard-function/` directory with
 
@@ -159,111 +167,54 @@ export FUNCTION_ID=0x96cE076e3Dda35679316b12F2b5F7b4A92C9a294
 npx hardhat run scripts/check_function.ts  --network arbitrumTestnet
 ```
 
-## Writing Switchboard Rust Functions
+## Writing Switchboard TS Functions
 
-In order to write a successfully running switchboard function, you'll need to import `switchboard-evm` to use the libraries which communicate the function results (which includes transactions to run) to the Switchboard Verifiers that execute these metatransactions.
+In order to write a successfully running switchboard function, you'll need to import `@switchboard-xyz/evm.js` to use the libraries which communicate the function results (which includes transactions to run) to the Switchboard Verifiers that execute these metatransactions.
 
 ### Setup
 
-Cargo.toml
+To get started, you'll need to install the all the packages:
 
-```toml
-[package]
-name = "function-name"
-version = "0.1.0"
-edition = "2021"
-
-[[bin]]
-name = "function-name"
-path = "src/main.rs"
-
-[dependencies]
-tokio = "^1"
-futures = "0.3"
-
-# at a minimum you'll need to include the following packages
-ethers = { version = "2.0.7", features = ["legacy"] } # legacy is only for networks that do not support https://eips.ethereum.org/EIPS/eip-2718
-switchboard-evm = "0.3.9"
+```bash
+npm install
 ```
+
+Checkout [package.json](./package.json) for more all the packages used in this project.
 
 ### Minimal Switchboard Function
 
-main.rs
+main.ts
 
-```rust
-use ethers::{
-    prelude::{abigen, ContractCall, SignerMiddleware},
-    providers::{Http, Provider},
-    types::U256,
-};
-use rand;
-use std::sync::Arc;
-use std::time::{Duration, SystemTime};
-use switchboard_evm::sdk::{EVMFunctionRunner, EVMMiddleware};
+```typescript
+import { BigNumber, ethers, utils, Contract } from "ethers";
+import { FunctionRunner } from "@switchboard-xyz/evm.js";
 
-#[tokio::main(worker_threads = 12)]
-async fn main() {
-    // define the abi for the functions in the contract you'll be calling
-    // -- here it's just a function named "callback", expecting a random u256
-    abigen!(
-        Receiver,
-        r#"[
-            function callback(uint256)
-        ]"#,
-    );
+// Generate a random number and call into "callback"
+async function main() {
+  // Create a FunctionRunner
+  const runner = new FunctionRunner();
 
-    // Generates a new enclave wallet, pulls in relevant environment variables
-    let function_runner = EVMFunctionRunner::new().unwrap();
+  // get contract - we only need the one callback function in the abi
+  const iface = new ethers.utils.Interface(["function callback(uint256)"]);
+  const contract = new Contract(
+    "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
+    iface,
+    runner.enclaveWallet
+  );
 
-    // set the gas limit and expiration date
-    let gas_limit = 1000000;
+  // get random uint256
+  const randomBytes = utils.randomBytes(32);
+  const bn = BigNumber.from(Array.from(randomBytes));
 
-    let expiration_time = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .unwrap_or(Duration::ZERO)
-        .as_secs()
-        + 64;
+  // get txn
+  const txn = await contract.populateTransaction.callback(bn);
 
-    // create a client, wallet and middleware. This is just so we can create the contract instance and sign the txn.
-    // @TODO: update the provider to whichever network you're using
-    let provider = Provider::<Http>::try_from("https://rpc.test.btcs.network").unwrap();
-    let client = Arc::new(
-        SignerMiddleware::new_with_provider_chain(
-            provider.clone(),
-            function_runner.enclave_wallet.clone(),
-        )
-        .await
-        .unwrap(),
-    );
-
-    // @TODO: your target contract address here
-    // get contract address from docker env
-    let contract_address = env!("SWITCHBOARD_RECEIVER_ADDRESS")
-        .parse::<ethers::types::Address>()
-        .unwrap();
-
-    let receiver_contract = Receiver::new(contract_address, client);
-
-    // generate a random number U256
-    let random: [u64; 4] = rand::random();
-    let random = U256(random);
-
-    // call function
-    let contract_fn_call: ContractCall<EVMMiddleware<_>, _> = receiver_contract.callback(random);
-
-    // create a vec of contract calls to pass to the function runner
-    let calls = vec![contract_fn_call.clone()];
-
-    // Emit the result
-    function_runner
-        .emit(
-            contract_address,
-            expiration_time.try_into().unwrap(),
-            gas_limit.into(),
-            calls,
-        )
-        .unwrap();
+  // emit txn
+  await runner.emit([txn]);
 }
+
+// run switchboard function
+main();
 ```
 
 ### Testing your function
@@ -276,8 +227,8 @@ Run the following to test your function:
 export CHAIN_ID=12345 # can be any integer
 export VERIFYING_CONTRACT=$SWITCHBOARD_ADDRESS # can be any valid address
 export FUNCTION_KEY=$FUNCTION_ID # can be any valid address
-cargo build
-cargo run # Note: this will include a warning about a missing quote which can be safely ignored.
+npm build
+npm test # Note: this will include a warning about a missing quote which can be safely ignored.
 ```
 
 Successful output:

@@ -1,9 +1,9 @@
-# Switchboard Params Receiver
+# Switchboard Receiver
 
 <div align="center">
   <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
 
-  <h1>Switchboard<br>EVM Functions Template</h1>
+  <h1>Switchboard<br>TS Functions Template</h1>
 
   <p>
     <a href="https://discord.gg/switchboardxyz">
@@ -15,29 +15,37 @@
   </p>
 </div>
 
-## Table of Content
+## Table of Contents
 
-- [Prerequisites](#prerequisites)
-  - [Installing Docker](#installing-docker)
-  - [Docker Setup](#docker-setup)
-  - [Build and Push](#build-and-push)
-- [Components](#components)
-  - [Contract](#contract)
-  - [Switchboard Function](#switchboard-function)
-  - [Publishing and Initialization](#publishing-and-initialization)
-  - [Adding Funding to Function](#adding-funding-to-function)
-  - [Printing Function Data](#printing-function-data)
-- [Writing Switchboard Rust Functions](#writing-switchboard-rust-functions)
-  - [Setup](#setup)
-  - [Switchboard Function With Params Example](#switchboard-function-with-params-example)
-  - [Testing your function](#testing-your-function)
-  - [Deploying and maintenance](#deploying-and-maintenance)
-- [Writing Receiver Contracts](#writing-receiver-contracts)
-  - [Receiver Example](#receiver-example)
+- [Switchboard Receiver](#switchboard-receiver)
+  - [Table of Contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
+    - [Node.js and Npm](#nodejs-and-npm)
+    - [Installing Docker](#installing-docker)
+    - [Docker Setup](#docker-setup)
+  - [Components](#components)
+    - [Contract](#contract)
+      - [Picking a network and setting up your environment](#picking-a-network-and-setting-up-your-environment)
+    - [Switchboard Function](#switchboard-function)
+    - [Publishing and Initialization](#publishing-and-initialization)
+    - [Initializing the function](#initializing-the-function)
+    - [Adding Funding to Function](#adding-funding-to-function)
+    - [Printing Function Data](#printing-function-data)
+  - [Writing Switchboard TS Functions](#writing-switchboard-ts-functions)
+    - [Setup](#setup)
+    - [Minimal Switchboard Function](#minimal-switchboard-function)
+    - [Testing your function](#testing-your-function)
+    - [Deploying and Maintenance](#deploying-and-maintenance)
+  - [Writing Receiver Contracts](#writing-receiver-contracts)
+    - [Receiver Example](#receiver-example)
 
 ## Prerequisites
 
-Before you can build and run the project, you'll need to have Docker installed on your system. Docker allows you to package and distribute applications as lightweight containers, making it easy to manage dependencies and ensure consistent behavior across different environments. Switchboard Functions are built and run within containers, so you'll need a docker daemon running to publish a new function.
+Before you can build and run the project, you'll need to have Node.js and npm installed on your system. You'll also need to have Docker installed on your system. Docker allows you to package and distribute applications as lightweight containers, making it easy to manage dependencies and ensure consistent behavior across different environments. Switchboard Functions are built and run within containers, so you'll need a docker daemon running to publish a new function.
+
+### Node.js and Npm
+
+If you don't have Node.js and npm installed, you can download and install them from the official Node.js website: [https://nodejs.org/](https://nodejs.org/)
 
 ### Installing Docker
 
@@ -76,7 +84,7 @@ docker login --username <your-username> --password <your-password>
 
 ### Contract
 
-This SwitchboardParamsReceiver is a simple Solidity contract that allows you to call a switchboard function with a set of parameters from another contract.
+This SwitchboardReceiver contract is a minimal example of a contract producing randomness in a callback function at a scheduled interval.
 
 When you deploy this contract, it will await to be bound to a switchboard function calling into it.
 
@@ -105,9 +113,9 @@ export SWITCHBOARD_RECEIVER_ADDRESS=<RECEIVER_ADDRESS>
 
 ### Switchboard Function
 
-Export the address to your environment and navigate to `./switchboard-function/`
+Export the address to your environment and navigate to `switchboard-function/`
 
-The bulk of the function logic can be found in [./switchboard-function/src/main.rs](switchboard-function/src/main.rs).
+The bulk of the function logic can be found in [./switchboard-function/src/index.ts](switchboard-function/src/index.ts).
 
 Build functions from the `switchboard-function/` directory with
 
@@ -135,10 +143,8 @@ See `scripts/create_function.ts` to create and deploy the function:
 
 ```bash
 export QUEUE_ID=0x392a3217624aC36b1EC1Cf95905D49594A4DCF64 # placeholder
-export SCHEDULE="" # no schedule
+export SCHEDULE="30 * * * * *" # 30 seconds
 export CONTAINER_NAME=switchboardlabs/test
-export ETH_VALUE="0.1" # initiallly fund it with 0.1 ETH
-export PERMITTED_CALLERS="0x392a3217624aC36b1EC1Cf95905D49594A4DCF64,0x392a3217624aC36b1EC1Cf95905D49594A4DCF64" # comma separated list of permitted callers (any address can call if empty)
 npx hardhat run scripts/create_function.ts  --network arbitrumTestnet # or coredaoTestnet
 ```
 
@@ -161,157 +167,92 @@ export FUNCTION_ID=0x96cE076e3Dda35679316b12F2b5F7b4A92C9a294
 npx hardhat run scripts/check_function.ts  --network arbitrumTestnet
 ```
 
-## Writing Switchboard Rust Functions
+## Writing Switchboard TS Functions
 
-In order to write a successfully running switchboard function, you'll need to import `switchboard-evm` to use the libraries which communicate the function results (which includes transactions to run) to the Switchboard Verifiers that execute these metatransactions.
+In order to write a successfully running switchboard function, you'll need to import `@switchboard-xyz/evm.js` to use the libraries which communicate the function results (which includes transactions to run) to the Switchboard Verifiers that execute these metatransactions.
 
 ### Setup
 
-Cargo.toml
+To get started, you'll need to install the all the packages:
 
-```toml
-[package]
-name = "function-name"
-version = "0.1.0"
-edition = "2021"
-
-[[bin]]
-name = "function-name"
-path = "src/main.rs"
-
-[dependencies]
-tokio = "^1"
-futures = "0.3"
-
-# at a minimum you'll need to include the following packages
-ethers = { version = "2.0.7", features = ["legacy"] } # legacy is only for networks that do not support https://eips.ethereum.org/EIPS/eip-2718
-tokio = "^1"
-futures = "0.3"
-rand = "0.8.5"
-switchboard-evm = "0.3.9"
-serde_json = "1.0.64"
+```bash
+npm install
 ```
 
-### Switchboard Function with Params Example
+Checkout [package.json](./package.json) for more all the packages used in this project.
 
-main.rs
+### Minimal Switchboard Function
 
-```rust
-use ethers::{
-    prelude::{abigen, SignerMiddleware, ContractCall, EthAbiType, EthAbiCodec},
-    providers::{Http, Provider},
-    types::{U256, Address},
-};
-use rand;
-use std::sync::Arc;
-use std::time::{SystemTime, Duration};
-use switchboard_evm::{
-    sdk::{EVMFunctionRunner, EVMMiddleware},
-};
-use std::env;
+main.ts
 
+```typescript
+import { BigNumber, ethers, utils, Contract } from "ethers";
+import { FunctionRunner } from "@switchboard-xyz/evm.js";
 
-#[tokio::main(worker_threads = 12)]
-async fn main() {
+// Generate a random number and call into "callback"
+async function main() {
+  // Create a FunctionRunner
+  const runner = new FunctionRunner();
 
-    // define the abi for the functions in the contract you'll be calling
-    // -- here it's just a function named "callback", expecting a random u256
-    abigen!(
-        Receiver,
-        r#"[
-            function fillOrder(uint256,uint256)
-        ]"#,
-    );
+  // get contract - we only need the one callback function in the abi
+  const iface = new ethers.utils.Interface([
+    "function fillOrder(uint256,uint256)",
+  ]);
 
-    // Define the type we're getting from the function call
-    #[derive(Debug, Clone, EthAbiType, EthAbiCodec)]
-    struct OrderParams {
-        order_id: U256,
-        sender: Address,
+  /*
+    @NOTE: decoded params must be defined in the order that they're defined in the solidity struct.
+    
+    This example uses the following solidity struct:
+      struct OrderParams {
+          uint256 orderId;
+          address sender;
+      }
+  */
+  const paramsSchema = ["uint256", "address"];
+
+  // get all the callId / params pairs (each callId has associated params)
+  const paramsResults = runner.params(paramsSchema);
+
+  // list of blocked senders 
+  const blockedSenders = new Set(["0x0000000000000000000000000000000000000000"])
+
+  // map paramsResults to calls
+  const calls = await Promise.all(paramsResults.map(async (paramsResult) => {
+    const { callId, params } = paramsResult;
+
+    if (!params) {
+      return undefined;
     }
 
-    // Generates a new enclave wallet, pulls in relevant environment variables
-    let function_runner = EVMFunctionRunner::new().unwrap();
+    const orderId: BigNumber = params.orderId;
+    const sender: string = params.sender;
 
-    // set the gas limit and expiration date
-    let gas_limit = 1_000_000;
-    let expiration_time_seconds = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .unwrap_or(Duration::ZERO)
-            .as_secs() + 64;
+    // check if sender is blocked
+    if (blockedSenders.has(sender)) {
+      return undefined;
+    }
 
+    // get random uint256
+    const randomBytes = utils.randomBytes(32);
+    const bn = BigNumber.from(Array.from(randomBytes));
 
-    // create a client, wallet and middleware. This is just so we can create the contract instance and sign the txn.
-    // @TODO: update the provider to whichever network you're using
-    let provider = Provider::<Http>::try_from("YOUR_RPC_ENDPOINT").unwrap();
-    let client = Arc::new(
-        SignerMiddleware::new_with_provider_chain(provider.clone(), function_runner.enclave_wallet.clone())
-            .await
-            .unwrap(),
-    );
+    // get txn
+    return contract.populateTransaction.fillOrder(orderId, bn);
+  }));
 
-    // get contract address from docker env
-    let contract_address = env!("SWITCHBOARD_RECEIVER_ADDRESS")
-        .parse::<ethers::types::Address>()
-        .unwrap();
+  const contract = new Contract(
+    "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
+    iface,
+    runner.enclaveWallet
+  );
 
-    let receiver_contract = Receiver::new(contract_address, client);
-
-    // Get individual call parameters and their corresponding call ids
-    let params = function_runner.params::<OrderParams>();
-
-    // No calls from these addresses will be processed
-    // It'll be cheaper to check off-chain in a function runner than on-chain in a contract,
-    // especially if there are many
-    let blocked_senders = vec!["0x0000000000000000000000000000000000000000"];
-
-    // Handle each function call that has happened since the last run
-    let calls: Vec<ContractCall<EVMMiddleware<_>, _>> = params.iter()
-        .filter(|param| {
-            // params in format (Result<OrderParams, Err>, call_id Address)[], one per call since last fn run
-            // here we filter out params that failed to parse & blocked params.sender addresses
-            !param.0.is_err() && !blocked_senders.contains(&param.0.as_ref().unwrap().sender.to_string().as_str())
-        })
-        .map(|param| {
-
-            // Handle each param, call_id pair
-            let (param_result, call_id) = param;
-            let param = param_result.as_ref().unwrap();
-            let order_id = param.order_id;
-
-            // generate a random number U256
-            let random: [u64; 4] = rand::random();
-            let random = U256(random);
-
-            // Create a contract call for each param
-            let contract_fn_call: ContractCall<EVMMiddleware<_>, _> =
-                receiver_contract.fill_order(order_id, random);
-
-            // return the contract call
-            contract_fn_call
-        }).collect::<Vec<_>>();
-
-    // Emit the result
-    // @NOTE function_runner.emit will mark all call_ids as resolved
-    function_runner.emit(
-        contract_address,
-        expiration_time_seconds.try_into().unwrap(),
-        gas_limit.into(),
-        calls,
-    ).unwrap();
-
-    // Alternatively if you wanted to only handle a subsset of calls in each run, you can call emit_resolve
-    // which only marks the passed-in call_ids as completed - leaving the rest for subsequent runs to handle.
-    //
-    // function_runner.emit_resolve(
-    //     contract_address,
-    //     expiration_time_seconds.try_into().unwrap(),
-    //     gas_limit.into(),
-    //     calls,
-    //     call_ids, // Vec<Address> of call_ids to resolve <--- this is the only difference
-    // ).unwrap();
-
+  // emit txn
+  await runner.emit(calls);
 }
+
+// run switchboard function
+main();
+
 ```
 
 ### Testing your function
@@ -324,8 +265,8 @@ Run the following to test your function:
 export CHAIN_ID=12345 # can be any integer
 export VERIFYING_CONTRACT=$SWITCHBOARD_ADDRESS # can be any valid address
 export FUNCTION_KEY=$FUNCTION_ID # can be any valid address
-cargo build
-cargo run # Note: this will include a warning about a missing quote which can be safely ignored.
+npm build
+npm test # Note: this will include a warning about a missing quote which can be safely ignored.
 ```
 
 Successful output:
@@ -343,33 +284,35 @@ After you publish the function and create it on the blockchain, you must keep th
 
 While Switchboard Functions can call back into any number of on-chain functions, it's useful to limit access to some privileged functions to just _your_ Switchboard Function.
 
-In order to do this you'll need to know the switchboard address you're using, and which functionId will be calling into the function in question. The following example handles params generated on-chain, addressing each call individually with custom data. This is useful for handling user orders in a case where you'd want to fulfill them as quickly as possible with fresh oracle data.
+In order to do this you'll need to know the switchboard address you're using, and which functionId will be calling into the function in question.
 
 ### Receiver Example
 
 ISwitchboard.sol
-
-```solidity
+```sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+// Simplest interface for interacting with Switchboard Functions
 interface ISwitchboard {
+    // Funding provided to calls is contributed to the function escrow
     function callFunction(
         address functionId,
         bytes memory params
     ) external payable returns (address callId);
 }
-
 ```
 
 Recipient.sol
 
-```solidity
+```sol
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
 import {ISwitchboard} from "./ISwitchboard.sol";
 
+// EIP2771 Context
+// Inherited by all contracts that are recipients of switchboard callbacks
 contract Recipient {
     address immutable switchboard;
 
@@ -377,7 +320,6 @@ contract Recipient {
         switchboard = _switchboard;
     }
 
-    // handle call to switchboard function
     function callSwitchboardFunction(
         address functionId,
         bytes memory params // arbitrary user-defined parameters handled function-side
@@ -402,7 +344,7 @@ contract Recipient {
 
 Example.sol
 
-```solidity
+```sol
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
@@ -484,7 +426,8 @@ contract SwitchboardParamsReceiver is Recipient {
         address msgSender = getMsgSender();
 
         // if callback hasn't been hit, set it on first function run
-        if (functionId == address(0) && msg.sender == switchboard) {
+        // @NOTE: do not do this in production, this is just for ease of testing
+        if (functionId == address(0)) {
             functionId = msgSender;
         }
 
@@ -508,4 +451,5 @@ contract SwitchboardParamsReceiver is Recipient {
         emit OrderResolved(orderId, msgSender, value);
     }
 }
+
 ```
