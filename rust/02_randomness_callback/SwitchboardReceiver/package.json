@@ -1,7 +1,7 @@
 {
-  "name": "switchboard-push-function",
+  "name": "switchboard-receiver-function",
   "version": "1.0.0",
-  "description": "The Switchboard Push implementation for the Ethereum Virtual Machine (EVM).",
+  "description": "The Switchboard Receiver implementation for the Ethereum Virtual Machine (EVM).",
   "keywords": [
     "switchboard",
     "oracle",
