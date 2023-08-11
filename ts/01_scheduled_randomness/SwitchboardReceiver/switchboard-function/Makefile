@@ -1,10 +1,9 @@
 .PHONY: build clean publish test
 
 # Variables
-CARGO_NAME=basic-oracle-function
 DOCKER_IMAGE_NAME?=switchboard-labs/basic-oracle-function
 
-DOCKER_BUILD_COMMAND=DOCKER_BUILDKIT=1 docker buildx build --platform linux/amd64 --build-arg CARGO_NAME=${CARGO_NAME} --build-arg SWITCHBOARD_RECEIVER_ADDRESS=${SWITCHBOARD_RECEIVER_ADDRESS}
+DOCKER_BUILD_COMMAND=DOCKER_BUILDKIT=1 docker buildx build --platform linux/amd64 --build-arg SWITCHBOARD_RECEIVER_ADDRESS=${SWITCHBOARD_RECEIVER_ADDRESS}
 
 # Default make task
 all: build

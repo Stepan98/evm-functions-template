@@ -9,7 +9,7 @@ async function main() {
   // get contract - we only need the one callback function in the abi
   const iface = new ethers.utils.Interface(["function callback(uint256)"]);
   const contract = new Contract(
-    "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
+    process.env.SWITCHBOARD_RECEIVER_ADDRESS,
     iface,
     runner.enclaveWallet
   );

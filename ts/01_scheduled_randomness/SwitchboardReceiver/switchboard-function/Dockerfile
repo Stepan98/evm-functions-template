@@ -1,5 +1,8 @@
 FROM gramineproject/gramine:v1.4
 
+ARG SWITCHBOARD_RECEIVER_ADDRESS
+ENV SWITCHBOARD_RECEIVER_ADDRESS=$SWITCHBOARD_RECEIVER_ADDRESS
+
 ENV PATH=$PATH:/root/.cargo/bin/
 ENV DEBIAN_FRONTEND="noninteractive"
 ENV DISTRO="ubuntu20.04-server"
@@ -67,12 +70,6 @@ COPY configs/boot.sh /boot.sh
 COPY configs/app.manifest.template app.manifest.template
 COPY configs/pccs.json /opt/intel/sgx-dcap-pccs/config/default.json
 COPY configs/sgx_default_qcnl.conf /etc/sgx_default_qcnl.conf
-
-# =--------------------------------------------------------------------------------------------------------------=
-# LOCAL FROM HERE
-
-ARG SWITCHBOARD_RECEIVER_ADDRESS
-ENV SWITCHBOARD_RECEIVER_ADDRESS=$SWITCHBOARD_RECEIVER_ADDRESS
 
 # Copy the binary
 WORKDIR /sgx
