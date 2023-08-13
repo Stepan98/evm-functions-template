@@ -143,7 +143,7 @@ See `scripts/create_function.ts` to create and deploy the function:
 
 ```bash
 export QUEUE_ID=0x392a3217624aC36b1EC1Cf95905D49594A4DCF64 # placeholder
-export SCHEDULE="30 * * * * *" # 30 seconds
+export SCHEDULE="" # No schedule since this will be params-triggered
 export CONTAINER_NAME=switchboardlabs/test
 npx hardhat run scripts/create_function.ts  --network arbitrumTestnet # or coredaoTestnet
 ```

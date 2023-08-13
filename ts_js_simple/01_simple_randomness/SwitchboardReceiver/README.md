@@ -145,6 +145,7 @@ See `scripts/create_function.ts` to create and deploy the function:
 export QUEUE_ID=0x392a3217624aC36b1EC1Cf95905D49594A4DCF64 # placeholder
 export SCHEDULE="30 * * * * *" # 30 seconds
 export CONTAINER_NAME=switchboardlabs/test
+export PERMITTED_CALLERS=$SWITCHBOARD_RECEIVER_ADDRESS
 npx hardhat run scripts/create_function.ts  --network arbitrumTestnet # or coredaoTestnet
 ```
 
@@ -173,48 +174,64 @@ In order to write a successfully running switchboard function, you'll need to im
 
 ### Setup
 
-To get started, you'll need to install the all the packages:
+To get started, you'll need to install the all the dependencies.
 
 ```bash
-npm install
+pnpm i
 ```
-
-Checkout [package.json](./package.json) for more all the packages used in this project.
 
 ### Minimal Switchboard Function
 
-main.ts
+config.js
 
-```typescript
-import { BigNumber, ethers, utils, Contract } from "ethers";
-import { FunctionRunner } from "@switchboard-xyz/evm.js";
+```javascript
+const fs = require("fs");
+const path = require("path");
 
-// Generate a random number and call into "callback"
-async function main() {
-  // Create a FunctionRunner
-  const runner = new FunctionRunner();
+const Location = {
+  Inline: 0,
+  Remote: 1,
+};
 
-  // get contract - we only need the one callback function in the abi
-  const iface = new ethers.utils.Interface(["function callback(uint256)"]);
-  const contract = new Contract(
-    "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
-    iface,
-    runner.enclaveWallet
-  );
+const CodeLanguage = {
+  JavaScript: 0,
+  Typescript: 1,
+};
 
-  // get random uint256
-  const randomBytes = utils.randomBytes(32);
-  const bn = BigNumber.from(Array.from(randomBytes));
+const ReturnType = {
+  uint: "uint256",
+  uint256: "uint256",
+  int: "int256",
+  int256: "int256",
+  string: "string",
+  bytes: "Buffer",
+  Buffer: "Buffer",
+};
 
-  // get txn
-  const txn = await contract.populateTransaction.callback(bn);
+// Configure the request by setting the fields below
+const requestConfig = {
+  codeLocation: Location.Inline,
+  codeLanguage: CodeLanguage.Typescript,
+  walletPrivateKey: process.env.PRIVATE_KEY,
+  secretsURLs: [],
+  source: fs.readFileSync(path.join(__dirname, "./main.js")).toString(),
+  args: ["1", "0x1"], // arguments passed to the function
+  expectedReturnType: ReturnType.uint256,
+  secrets: {},
+  perNodeSecrets: [],
+};
 
-  // emit txn
-  await runner.emit([txn]);
-}
+module.exports = requestConfig;
+```
 
-// run switchboard function
-main();
+main.js
+
+```javascript
+const val = crypto.randomBytes(32);
+const bn = BigInt(`0x${val.toString("hex")}`);
+
+// Supply a random value
+Functions.encodeUint256(bn);
 ```
 
 ### Testing your function
@@ -227,8 +244,8 @@ Run the following to test your function:
 export CHAIN_ID=12345 # can be any integer
 export VERIFYING_CONTRACT=$SWITCHBOARD_ADDRESS # can be any valid address
 export FUNCTION_KEY=$FUNCTION_ID # can be any valid address
-npm build
-npm test # Note: this will include a warning about a missing quote which can be safely ignored.
+pnpm build
+pnpm test # Note: this will include a warning about a missing quote which can be safely ignored.
 ```
 
 Successful output:
@@ -244,40 +261,11 @@ After you publish the function and create it on the blockchain, you must keep th
 
 ## Writing Receiver Contracts
 
-While Switchboard Functions can call back into any number of on-chain functions, it's useful to limit access to some privileged functions to just _your_ Switchboard Function.
+Using the [FunctionsClient](./contracts/src/FunctionsClient.sol) contract you can receive functions data with very few additions. All you have to do is inherit from the FunctionsClient contract and implement the `onCallback` function. This function will be triggered when the callback is received and the data is set.
 
-In order to do this you'll need to know the switchboard address you're using, and which functionId will be calling into the function in question.
+You can trigger the return type in the configuration file for the function. The return type can be `uint256`, `int256`, `string`, or `bytes`. The return type will be encoded in the callback data.
 
 ### Receiver Example
-
-Recipient.sol
-
-```sol
-//SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
-
-// EIP2771 Context
-// Inherited by all contracts that are recipients of switchboard callbacks
-contract Recipient {
-  address immutable switchboard;
-
-  constructor(address _switchboard) {
-    switchboard = _switchboard;
-  }
-
-  // get the encoded sender if this message is coming from the switchboard contract
-  // if things are working as intended, the sender will be the functionId
-
-  function getMsgSender() internal view returns (address payable signer) {
-    signer = payable(msg.sender);
-    if (msg.data.length >= 20 && signer == switchboard) {
-      assembly {
-        signer := shr(96, calldataload(sub(calldatasize(), 20)))
-      }
-    }
-  }
-}
-```
 
 Example.sol
 
@@ -285,37 +273,27 @@ Example.sol
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import { Recipient } from "./Recipient.sol";
+import {FunctionsClient} from "./FunctionsClient.sol";
 
-contract ReceiverExample is Recipient {
-  uint256 public randomValue;
-  address functionId;
+contract ReceiverExample is FunctionsClient {
+    uint256 public randomValue;
 
-  event NewRandomValue(uint256 value);
+    event NewRandomValue(uint256 value);
+    error InvalidCallbackType();
 
-  constructor(
-    address _switchboard // Switchboard contract address
-  ) Recipient(_switchboard) {}
+    constructor(
+        address _switchboard // Switchboard contract address
+    ) FunctionsClient(_switchboard) {}
 
-  function callback(uint256 value) external {
-    // extract the sender from the callback, this validates that the switchboard contract called this function
-    address msgSender = getMsgSender();
+    function onCallback() internal override {
+        // expecting a new Uint256
+        if (latestCallbackType != CallbackType.CALLBACK_UINT256) {
+            revert InvalidCallbackType();
+        }
 
-    if (functionId == address(0)) {
-      // set the functionId if it hasn't been set yet
-      functionId = msgSender;
+        // expecting a new Uint256
+        randomValue = latestValueUint256;
+        emit NewRandomValue(randomValue);
     }
-
-    // make sure the encoded caller is our function id
-    if (msgSender != functionId) {
-      revert("Invalid sender");
-    }
-
-    // set the random value
-    randomValue = value;
-
-    // emit an event
-    emit NewRandomValue(value);
-  }
 }
 ```
