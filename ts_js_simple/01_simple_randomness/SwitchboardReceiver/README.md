@@ -269,7 +269,7 @@ You can trigger the return type in the configuration file for the function. The 
 
 Example.sol
 
-```sol
+```solidity
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 

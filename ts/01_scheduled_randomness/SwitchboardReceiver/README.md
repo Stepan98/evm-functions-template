@@ -252,7 +252,7 @@ In order to do this you'll need to know the switchboard address you're using, an
 
 Recipient.sol
 
-```sol
+```solidity
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
@@ -281,7 +281,7 @@ contract Recipient {
 
 Example.sol
 
-```sol
+```solidity
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
