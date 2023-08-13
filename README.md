@@ -110,7 +110,7 @@ Once you've installed the dependencies, you can continue onto the README for the
 
 - **How do I limit the number of addresses that can call my Switchboard Function?**
 
-  You can limit the number of addresses that can use your Switchboard Function by using the [@switchboard-xyz/evm.js](https://github.com/switchboard-xyz/evm-sdk) npm package. An easy way to do this is to modify one of the scripts in any of the example dirs [here](./ts/01_scheduled_randomness/SwitchboardReceiver/scripts).
+  You can limit the number of addresses that can use your Switchboard Function by using the [@switchboard-xyz/evm.js](https://github.com/switchboard-xyz/evm-sdk) npm package. An easy way to do this is to modify one of the scripts in any of the [example dirs](./ts/01_scheduled_randomness/SwitchboardReceiver/scripts).
 
   ```typescript
   const tx = await switchboardProgram.sb.setFunctionConfig(
