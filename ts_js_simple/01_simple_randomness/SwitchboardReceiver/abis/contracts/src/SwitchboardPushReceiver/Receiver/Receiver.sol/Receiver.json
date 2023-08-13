@@ -1,0 +1,12 @@
+[
+  "error FeedUninitialized(address)",
+  "error IncorrectInputLength()",
+  "error InvalidSender(address,address)",
+  "function callback(bytes32[],int256[],uint256)",
+  "function deployFeedAdapter(address,string,string)",
+  "function feedNames() view returns (bytes32[])",
+  "function feeds(bytes32) view returns (tuple(address,bytes32,uint80,tuple(int256,uint256,uint256),bool))",
+  "function getAllFeeds() view returns (tuple(address,bytes32,uint80,tuple(int256,uint256,uint256),bool)[])",
+  "function getLatestResult(address) returns (int256, uint256, uint256, uint80)",
+  "function results(bytes32,uint80) view returns (tuple(int256,uint256,uint256))"
+]

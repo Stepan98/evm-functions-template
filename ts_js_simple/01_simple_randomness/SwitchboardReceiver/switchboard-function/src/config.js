@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 
 const Location = {
   Inline: 0,
@@ -26,7 +27,7 @@ const requestConfig = {
   codeLanguage: CodeLanguage.Typescript,
   walletPrivateKey: process.env.PRIVATE_KEY,
   secretsURLs: [],
-  source: fs.readFileSync("./main.js").toString(),
+  source: fs.readFileSync(path.join(__dirname, "./main.js")).toString(),
   args: [],
   expectedReturnType: ReturnType.uint256,
   secrets: {},

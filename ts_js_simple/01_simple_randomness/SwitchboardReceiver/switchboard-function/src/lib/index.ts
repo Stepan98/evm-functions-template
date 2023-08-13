@@ -3,8 +3,12 @@ import { FunctionRunner } from "@switchboard-xyz/evm.js";
 import { Functions } from "./Functions";
 import { Log } from "./Log";
 import { getRequestConfig } from "./utils";
-import * as config from "../config";
+import * as crypto from "crypto";
+
 import * as vm from "node:vm";
+
+// get compiled config
+import config from "./config.json";
 
 // Run the switchboard function
 async function main() {
@@ -16,10 +20,10 @@ async function main() {
 
   // Contract interface for FunctionsClient
   const iface = new ethers.utils.Interface([
-    "callbackUint256(uint256 value)",
-    "callbackInt256(int256 value)",
-    "callbackBytes(bytes value)",
-    "callbackString(string value)",
+    "function callbackBytes(bytes)",
+    "function callbackInt256(int256)",
+    "function callbackString(string)",
+    "function callbackUint256(uint256)",
   ]);
 
   // Get the contract address
@@ -57,6 +61,9 @@ async function main() {
       Functions,
       Log,
       args: args && args.length ? args[0] : [],
+
+      // Add more context utils here
+      crypto, // node crypto for randomness
     };
 
     // Result

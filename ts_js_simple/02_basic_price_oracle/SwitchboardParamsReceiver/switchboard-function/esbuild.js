@@ -26,7 +26,7 @@ fs.rmSync(path.join(__dirname, "dist"), {
 build({
   ...commonOptions,
   format: "cjs",
-  entryPoints: ["./src/index.ts"],
+  entryPoints: ["./src/lib/index.ts"],
   outfile: "dist/index.js",
 })
   .then(({ metafile }) => {

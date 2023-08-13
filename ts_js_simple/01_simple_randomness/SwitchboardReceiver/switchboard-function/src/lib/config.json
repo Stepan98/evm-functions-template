@@ -1,0 +1,10 @@
+{
+  "codeLocation": 0,
+  "codeLanguage": 1,
+  "secretsURLs": [],
+  "source": "const val = crypto.randomBytes(32);\nconst bn = BigInt(`0x${val.toString(\"hex\")}`);\n\n// Supply a random value\nFunctions.encodeUint256(bn);\n",
+  "args": [],
+  "expectedReturnType": "uint256",
+  "secrets": {},
+  "perNodeSecrets": []
+}

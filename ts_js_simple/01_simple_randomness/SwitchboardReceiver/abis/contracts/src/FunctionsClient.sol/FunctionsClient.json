@@ -1,0 +1,16 @@
+[
+  "error InvalidMsgDataLength(address,address)",
+  "error InvalidSender(address,address)",
+  "function callbackBytes(bytes)",
+  "function callbackInt256(int256)",
+  "function callbackString(string)",
+  "function callbackUint256(uint256)",
+  "function functionId() view returns (address)",
+  "function latestCallbackTimestamp() view returns (uint256)",
+  "function latestCallbackType() view returns (uint8)",
+  "function latestValueBytes() view returns (bytes)",
+  "function latestValueInt256() view returns (int256)",
+  "function latestValueString() view returns (string)",
+  "function latestValueUint256() view returns (uint256)",
+  "function switchboard() view returns (address)"
+]
