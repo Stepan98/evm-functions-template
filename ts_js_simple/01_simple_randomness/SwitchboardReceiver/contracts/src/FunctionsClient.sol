@@ -26,6 +26,7 @@ abstract contract FunctionsClient {
     // Received Latest Value from Switchboard Function
     uint256 public latestCallbackTimestamp;
     CallbackType public latestCallbackType;
+    address public latestCallbackCallId;
 
     //=========================================================================
     // Responses - unused vals and fns can be safely deleted to save gas
@@ -66,24 +67,50 @@ abstract contract FunctionsClient {
     // Callbacks - unused callbacks can be safely removed to save gas
     //=========================================================================
 
-    function callbackUint256(uint256 value) external onlyCallback {
+    function callbackUint256(uint256 value) public onlyCallback {
         latestValueUint256 = value;
         latestCallbackType = CallbackType.CALLBACK_UINT256;
     }
 
-    function callbackInt256(int256 value) external onlyCallback {
+    function callbackInt256(int256 value) public onlyCallback {
         latestValueInt256 = value;
         latestCallbackType = CallbackType.CALLBACK_INT256;
     }
 
-    function callbackBytes(bytes memory value) external onlyCallback {
+    function callbackBytes(bytes memory value) public onlyCallback {
         latestValueBytes = value;
         latestCallbackType = CallbackType.CALLBACK_BYTES;
     }
 
-    function callbackString(string memory value) external onlyCallback {
+    function callbackString(string memory value) public onlyCallback {
         latestValueString = value;
         latestCallbackType = CallbackType.CALLBACK_STRING;
+    }
+
+    //=========================================================================
+    // Callbacks with callId - can also be removed if unneeded
+    //=========================================================================
+    function callbackUint256WithId(uint256 value, address callId) external {
+        latestCallbackCallId = callId;
+        callbackUint256(value);
+    }
+
+    function callbackInt256WithId(int256 value, address callId) external {
+        latestCallbackCallId = callId;
+        callbackInt256(value);
+    }
+
+    function callbackBytesWithId(bytes memory value, address callId) external {
+        latestCallbackCallId = callId;
+        callbackBytes(value);
+    }
+
+    function callbackStringWithId(
+        string memory value,
+        address callId
+    ) external {
+        latestCallbackCallId = callId;
+        callbackString(value);
     }
 
     //=========================================================================

@@ -24,6 +24,10 @@ async function main() {
     "function callbackInt256(int256)",
     "function callbackString(string)",
     "function callbackUint256(uint256)",
+    "function callbackBytesWithId(bytes,address)",
+    "function callbackUint256WithId(uint256,address)",
+    "function callbackInt256WithId(int256,address)",
+    "function callbackStringWithId(string,address)",
   ]);
 
   // Get the contract address
@@ -43,24 +47,36 @@ async function main() {
     config.expectedReturnType
   );
 
-  // get callback function for return type
-  const callback = [
+  // match up callback functions with return types
+  const callbackFunctions = [
     contract.populateTransaction.callbackUint256,
     contract.populateTransaction.callbackInt256,
     contract.populateTransaction.callbackString,
     contract.populateTransaction.callbackBytes,
-  ][returnTypeIdx];
+  ];
+
+  // match up param-triggered callback functions with return types
+  const callbackFunctionsWithId = [
+    contract.populateTransaction.callbackUint256WithId,
+    contract.populateTransaction.callbackInt256WithId,
+    contract.populateTransaction.callbackStringWithId,
+    contract.populateTransaction.callbackBytesWithId,
+  ];
+
+  // get callback function for return type
+  const callback = callbackFunctions[returnTypeIdx];
+  const callbackWithId = callbackFunctionsWithId[returnTypeIdx];
 
   // Handle all params in parallel
   const functionCalls = requests.map(async (request) => {
     // Get params from the request
-    const { params: args } = request;
+    const { callId, params: args } = request;
 
     // Function context
     const context = {
       Functions,
       Log,
-      args: args && args.length ? args[0] : [],
+      args: args && args.length ? args : [],
 
       // Add more context utils here
       crypto, // node crypto for randomness
@@ -76,7 +92,13 @@ async function main() {
         requestConfig.source,
         vm.createContext(context)
       );
-      return await callback(result);
+
+      // handle calls with IDs
+      if (callId) {
+        return await callbackWithId(result, callId);
+      } else {
+        return await callback(result);
+      }
     } catch (err) {
       console.log(err);
       return undefined;

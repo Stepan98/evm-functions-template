@@ -22,6 +22,7 @@ loader.env.CHAIN_ID = { passthrough = true }
 loader.env.VERIFYING_CONTRACT = { passthrough = true }
 loader.env.FUNCTION_CALL_IDS = { passthrough = true }
 loader.env.FUNCTION_PARAMS = { passthrough = true }
+loader.env.SWITCHBOARD_RECEIVER_ADDRESS = { passthrough = true }
 
 fs.mounts = [
   { uri = "file:{{ gramine.runtimedir() }}", path = "/lib" },

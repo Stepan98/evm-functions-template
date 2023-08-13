@@ -1,0 +1,13 @@
+{
+  "codeLocation": 0,
+  "codeLanguage": 1,
+  "secretsURLs": [],
+  "source": "const orderId = args[0];\nconst sender = args[1];\n\nconst val = crypto.randomBytes(32);\nconst bn = BigInt(`0x${val.toString(\"hex\")}`);\n\nconst blockedAddresses = [\n  \"0x0\",\n]\n\n// this will resolve the order without producing a value for the user\nif (blockedAddresses.includes(sender)) {\n  throw new Error(\"Sender is blocked\");\n}\n\n// check if orderId is valid\nif (parseInt(orderId) < 0) {\n  throw new Error(\"Invalid orderId\");\n}\n\n// Supply a random value to resolve this user/contract (sender's) number request\nFunctions.encodeUint256(bn);\n",
+  "args": [
+    "1",
+    "0x1"
+  ],
+  "expectedReturnType": "uint256",
+  "secrets": {},
+  "perNodeSecrets": []
+}
