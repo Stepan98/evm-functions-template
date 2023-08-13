@@ -17,6 +17,8 @@
     "test": "node dist/"
   },
   "dependencies": {
+    "axios": "^1.4.0",
+    "eth-crypto": "^2.6.0",
     "@switchboard-xyz/evm.js": "3.12.14",
     "chalk": "^5.0.1",
     "esbuild": "^0.19.0",
