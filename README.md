@@ -67,8 +67,77 @@ Developers with proficiency in Rust can leverage its lightweight yet robust capa
 - [Link to Randomness Callback Implementation](./rust/02_randomness_callback/SwitchboardReceiver)
 - [Link to User-Triggered Function With Params Implementation](./rust/03_user_triggered_callback/SwitchboardParamsReceiver)
 
-## Setup Example
+## Setup
 
-### Configure the function
+### Install Pre-requisites
 
-## Build and Push
+- [Node.js](https://nodejs.org/en/download/)
+- [Pnpm](https://pnpm.io/installation)
+- [Docker](https://docs.docker.com/get-docker/)
+
+### Clone the repo and install dependencies:
+
+```bash
+git clone https://github.com/switchboard-xyz/evm-functions-template
+cd evm-functions-template
+
+# install dependencies for contract development
+cd ts # or cd ts_js_simple or cd rust
+pnpm install
+
+# install dependencies for function development
+cd switchboard-function
+pnpm install
+```
+
+### Configuring the Function
+
+Once you've installed the dependencies, you can continue onto the README for the style of function you'd like to build: [Typescript](./ts/README.md), [Typescript/Javascript Simplified](./ts_js_simple/README.md), or [Rust](./rust/README.md).
+
+### FAQ
+
+- **How do I use the Switchboard Functions template?**
+
+  The Switchboard Functions template is a starting point for developers to create their own Switchboard Functions. It includes a sample function that can be used as a reference for creating new functions. The template also includes a sample contract that can be used as a reference for creating new contracts.
+
+- **How do I create a new Switchboard Function?**
+
+  To create a new Switchboard Function, you can copy the sample function and modify it to suit your needs. You can also create a new function from scratch using the sample contract as a reference. We would love to hear about your experience creating new functions - if you would like personalized help, please reach out to us on [Discord](https://discord.gg/switchboardxyz) or [X (formerly known as Twitter)](https://x.com/switchboardxyz).
+
+- **How do I use secrets with Switchboard Functions?**
+
+  Secrets aren't currently supported by Switchboard Functions. However, we are working on adding first-party support for secrets in the near future. You can embed a custom URL in your function to retrieve secrets from a secure location, such as a self-hosted server or a cloud service like AWS or Google Cloud.
+
+- **How do I limit the number of addresses that can call my Switchboard Function?**
+
+  You can limit the number of addresses that can use your Switchboard Function by using the [@switchboard-xyz/evm.js](https://github.com/switchboard-xyz/evm-sdk) npm package. An easy way to do this is to modify one of the scripts in any of the example dirs [here](./ts/01_scheduled_randomness/SwitchboardReceiver/scripts).
+
+  ```typescript
+  const tx = await switchboardProgram.sb.setFunctionConfig(
+    functionId,
+    "Switchboard Function Name",
+    userAddress,
+    "dockerhub",
+    "switchboardlabs/basic-oracle-function", // image name
+    "latest",
+    "30 * * * * *", // run every 30 seconds
+    "", // params surfaced to explorer (optional)
+    ["0x9017e82c621461e5bd1efc884c03a86ab62dafac"] // <----- permitted addresses
+  );
+  ```
+
+- **What other settings can I use?**
+  You can add requirements to callers if you want to charge for use of your function and open it up to the public.
+
+  These settings are entirely optional.
+
+  ```typescript
+  const tx = await switchboardProgram.sb.setFunctionCallSettings(
+      functionId,
+      requireEstimatedRunCostFee: true, // require funding for any given call to be at least the estimated run cost
+      minimumFee: 0, // disabled
+      maxGasCost: 0, // disabled
+      requireCallerPayFullCost: false, // don't allow resolution of runs that cost more than the caller has paid
+      requireSenderBeReturnAddress: false, // don't require the caller to be the callback address
+    )
+  ```
