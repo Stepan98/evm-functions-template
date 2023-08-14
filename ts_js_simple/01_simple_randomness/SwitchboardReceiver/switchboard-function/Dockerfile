@@ -59,6 +59,7 @@ RUN npm i -g pnpm
 # Setup Application
 WORKDIR /root/app
 COPY ./* ./
+
 COPY ./src/ ./src/
 RUN rm -rf node_modules/
 RUN mkdir -p /root/app/dist/

@@ -55,6 +55,9 @@ build({
   format: "cjs",
   entryPoints: ["./src/lib/index.ts"],
   outfile: "dist/index.js",
+  define: {
+    "process.env.SWITCHBOARD_RECEIVER_ADDRESS": `"${process.env.SWITCHBOARD_RECEIVER_ADDRESS}"`,
+  },
 })
   .then(({ metafile }) => {
     if (metafile && !isCI) {
