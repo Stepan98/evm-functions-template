@@ -411,13 +411,11 @@ async fn get_feed_data() -> HashMap<[u8; 32], I256> {
     }
     // Only retain more than 2 samples
     aggregates.retain(|k, v| v.len() > 2 && k.quote.contains("USD"));
-    // println!("{:#?}", aggregates);
-    // println!("{:#?}", aggregates.len());
 
     let mut feed_map = HashMap::<[u8; 32], I256>::new();
 
     // go through each pair and calculate the average
-    for (k, v) in aggregates {
+    for (k, v) in &aggregates {
         let _sum = 0.0;
 
         // get the median price
@@ -429,7 +427,7 @@ async fn get_feed_data() -> HashMap<[u8; 32], I256> {
             })
             .collect();
         prices.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        
+
         let mut median: Decimal;
 
         // handle even and odd cases
@@ -442,13 +440,13 @@ async fn get_feed_data() -> HashMap<[u8; 32], I256> {
 
         // get pair name as string
         let name = format!("{}/{}", k.base, k.quote);
-        
-        // get mean 
+
+        // get mean
         let sum: Decimal = prices.iter().sum();
         let count = Decimal::from(prices.len() as i32);
         let mean = sum / count;
 
-        // get variance 
+        // get variance
         let squared_deviations: Decimal = prices
             .iter()
             .map(|&x| (x - mean).powi(2))
@@ -495,10 +493,12 @@ async fn get_feed_data() -> HashMap<[u8; 32], I256> {
         // get median with fixed decimals at 18 as I256
         median.rescale(18);
         let median = I256::from(median.mantissa());
+        println!("{} -> {}", name, median);
 
         // add to map
         feed_map.insert(bytes32, median);
     }
+    println!("{} feeds populated", aggregates.len());
 
     // return the medians and names
     feed_map
@@ -517,6 +517,6 @@ mod tests {
     #[tokio::test]
     async fn test() {
         let feed_map = get_feed_data().await;
-        println!("{:#?}", feed_map);
+        // println!("{:#?}", feed_map);
     }
 }

@@ -30,4 +30,5 @@ COPY ./config/app.manifest.template /sgx/app.manifest.template
 # Get the measurement from the enclave
 RUN /get_measurement.sh
 
+COPY ./config/boot.sh /boot.sh
 ENTRYPOINT ["bash", "/boot.sh"]

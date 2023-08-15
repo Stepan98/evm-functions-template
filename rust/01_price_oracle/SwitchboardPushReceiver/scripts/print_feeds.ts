@@ -1,7 +1,11 @@
 import { ethers } from "hardhat";
+import moment from "moment-timezone";
+const BigNumber = require("bignumber.js");
 
 async function main() {
   const sbPushAddress = process.env.SWITCHBOARD_PUSH_ADDRESS ?? "";
+
+  const divisor = new BigNumber("1000000000000000000");
 
   if (!sbPushAddress) {
     throw new Error(
@@ -20,7 +24,10 @@ async function main() {
     console.log(
       feedName,
       feed.feedId.toString(),
-      feed.latestResult.value.toString()
+      new BigNumber(feed.latestResult.value.toString()).dividedBy(divisor).toString(),
+      moment(new Date(feed.latestResult.updatedAt.toNumber() * 1000))
+        .tz("America/New_York")
+        .format("YYYY-MM-DD HH:mm:ss")
     );
   });
 }

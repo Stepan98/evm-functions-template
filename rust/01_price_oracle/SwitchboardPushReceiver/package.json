@@ -150,7 +150,9 @@
     "zksync-web3": "^0.14.3"
   },
   "dependencies": {
+    "bignumber.js": "^9.1.1",
     "ethereumjs-util": "^7.1.5",
+    "moment-timezone": "^0.5.43",
     "yargs": "github:yargs/yargs"
   }
 }
