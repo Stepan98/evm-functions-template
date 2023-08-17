@@ -317,7 +317,7 @@ contract Recipient {
   // get the encoded sender if this message is coming from the switchboard contract
   // if things are working as intended, the sender will be the functionId
 
-  function getMsgSender() internal view returns (address payable signer) {
+  function getEncodedFunctionId() internal view returns (address payable signer) {
     signer = payable(msg.sender);
     if (msg.data.length >= 20 && signer == switchboard) {
       assembly {
@@ -348,7 +348,7 @@ contract ReceiverExample is Recipient {
 
   function callback(uint256 value) external {
     // extract the sender from the callback, this validates that the switchboard contract called this function
-    address msgSender = getMsgSender();
+    address msgSender = getEncodedFunctionId();
 
     if (functionId == address(0)) {
       // set the functionId if it hasn't been set yet

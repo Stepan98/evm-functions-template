@@ -1,0 +1,3 @@
+[
+  "function callFunction(address,bytes) payable returns (address)"
+]

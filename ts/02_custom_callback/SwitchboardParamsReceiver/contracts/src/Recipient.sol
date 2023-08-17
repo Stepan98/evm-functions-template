@@ -23,7 +23,11 @@ contract Recipient {
     }
 
     // get forwarded sender if trusted forwarder is used
-    function getMsgSender() internal view returns (address payable signer) {
+    function getEncodedFunctionId()
+        internal
+        view
+        returns (address payable signer)
+    {
         signer = payable(msg.sender);
         if (msg.data.length >= 20 && signer == switchboard) {
             assembly {

@@ -331,7 +331,7 @@ contract Recipient {
     }
 
     // get forwarded sender if trusted forwarder is used
-    function getMsgSender() internal view returns (address payable signer) {
+    function getEncodedFunctionId() internal view returns (address payable signer) {
         signer = payable(msg.sender);
         if (msg.data.length >= 20 && signer == switchboard) {
             assembly {
@@ -403,7 +403,7 @@ contract SwitchboardParamsReceiver is Recipient {
 
         // encode the order parameters
         bytes memory encodedOrder = abi.encode(
-            OrderParams({orderId: nextOrderId, sender: getMsgSender()})
+            OrderParams({orderId: nextOrderId, sender: msg.sender})
         );
 
         // call out to the swithcboard function, triggering an off-chain run
@@ -414,7 +414,7 @@ contract SwitchboardParamsReceiver is Recipient {
         orders[nextOrderId].callId = callId;
 
         // emit an event
-        emit OrderCreated(nextOrderId, callId, getMsgSender());
+        emit OrderCreated(nextOrderId, callId, msg.sender);
 
         // increment nextOrderId
         nextOrderId++;
@@ -423,7 +423,7 @@ contract SwitchboardParamsReceiver is Recipient {
     // Callback into contract with value computed off-chain
     function fillOrder(uint256 orderId, uint256 value) external {
         // extract the sender from the callback, this validates that the switchboard contract called this function
-        address msgSender = getMsgSender();
+        address msgSender = getEncodedFunctionId();
 
         // if callback hasn't been hit, set it on first function run
         // @NOTE: do not do this in production, this is just for ease of testing

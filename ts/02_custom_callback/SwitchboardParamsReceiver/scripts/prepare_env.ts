@@ -17,7 +17,9 @@ const config: Config = {
   chainId: 1,
   verifyingContract: "0x0000000000000000000000000000000000000001",
   functionKey: "0x0000000000000000000000000000000000000001",
-  callIds: ["0x0000000000000000000000000000000000000001"], // Add callIds here
+  callIds: [
+    "0x0000000000000000000000000000000000000001"
+  ], // Add callIds here
   params: [
     // One param to each callId (can be empty)
     {

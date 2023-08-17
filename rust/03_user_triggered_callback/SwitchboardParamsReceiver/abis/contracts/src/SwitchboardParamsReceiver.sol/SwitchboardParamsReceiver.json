@@ -1,0 +1,13 @@
+[
+  "constructor(address)",
+  "error InvalidOrder(uint256)",
+  "error InvalidSender(address,address)",
+  "error InvalidValue(uint256)",
+  "event OrderCreated(uint256,address,address)",
+  "event OrderResolved(uint256,address,uint256)",
+  "function EXPECTED_FUNCTION_GAS_COST() view returns (uint256)",
+  "function createOrder() payable",
+  "function fillOrder(uint256,uint256)",
+  "function latestValue() view returns (uint256)",
+  "function orders(uint256) view returns (address, address, uint256, bool)"
+]

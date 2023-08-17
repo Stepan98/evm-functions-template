@@ -15,7 +15,7 @@ contract ReceiverExample is Recipient {
 
     function callback(uint256 value) external {
         // extract the sender from the callback, this validates that the switchboard contract called this function
-        address msgSender = getMsgSender();
+        address msgSender = getEncodedFunctionId();
 
         // set functionId to the sender if it's empty and the sender is the switchboard
         if (functionId == address(0) && msg.sender == switchboard) {
