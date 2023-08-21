@@ -139,7 +139,7 @@ export SCHEDULE="" # no schedule
 export CONTAINER_NAME=switchboardlabs/test
 export ETH_VALUE="0.1" # initiallly fund it with 0.1 ETH
 export PERMITTED_CALLERS="0x392a3217624aC36b1EC1Cf95905D49594A4DCF64,0x392a3217624aC36b1EC1Cf95905D49594A4DCF64" # comma separated list of permitted callers (any address can call if empty)
-npx hardhat run scripts/create_function.ts  --network arbitrumTestnet # or coredaoTestnet
+pnpm exec hardhat run scripts/create_function.ts  --network arbitrumTestnet # or coredaoTestnet
 ```
 
 ### Adding Funding to Function
@@ -149,7 +149,7 @@ Add funds to your function by doing the following:
 ```bash
 export FUNCTION_ID=0x96cE076e3Dda35679316b12F2b5F7b4A92C9a294
 export ETH_VALUE="0.1"
-npx hardhat run scripts/extend_function.ts  --network arbitrumTestnet
+pnpm exec hardhat run scripts/extend_function.ts  --network arbitrumTestnet
 ```
 
 ### Printing Function Data
@@ -158,7 +158,7 @@ Now view your function config to ensure it is to your liking:
 
 ```bash
 export FUNCTION_ID=0x96cE076e3Dda35679316b12F2b5F7b4A92C9a294
-npx hardhat run scripts/check_function.ts  --network arbitrumTestnet
+pnpm exec hardhat run scripts/check_function.ts  --network arbitrumTestnet
 ```
 
 ## Writing Switchboard Rust Functions
@@ -354,12 +354,11 @@ ISwitchboard.sol
 pragma solidity ^0.8.9;
 
 interface ISwitchboard {
-    function callFunction(
-        address functionId,
-        bytes memory params
-    ) external payable returns (address callId);
+  function callFunction(
+    address functionId,
+    bytes memory params
+  ) external payable returns (address callId);
 }
-
 ```
 
 Recipient.sol
@@ -368,35 +367,35 @@ Recipient.sol
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import {ISwitchboard} from "./ISwitchboard.sol";
+import { ISwitchboard } from "./ISwitchboard.sol";
 
 contract Recipient {
-    address immutable switchboard;
+  address immutable switchboard;
 
-    constructor(address _switchboard) {
-        switchboard = _switchboard;
-    }
+  constructor(address _switchboard) {
+    switchboard = _switchboard;
+  }
 
-    // handle call to switchboard function
-    function callSwitchboardFunction(
-        address functionId,
-        bytes memory params // arbitrary user-defined parameters handled function-side
-    ) internal returns (address callId) {
-        callId = ISwitchboard(switchboard).callFunction{value: msg.value}(
-            functionId,
-            params
-        );
-    }
+  // handle call to switchboard function
+  function callSwitchboardFunction(
+    address functionId,
+    bytes memory params // arbitrary user-defined parameters handled function-side
+  ) internal returns (address callId) {
+    callId = ISwitchboard(switchboard).callFunction{ value: msg.value }(
+      functionId,
+      params
+    );
+  }
 
-    // get forwarded sender if trusted forwarder is used
-    function getMsgSender() internal view returns (address payable signer) {
-        signer = payable(msg.sender);
-        if (msg.data.length >= 20 && signer == switchboard) {
-            assembly {
-                signer := shr(96, calldataload(sub(calldatasize(), 20)))
-            }
-        }
+  // get forwarded sender if trusted forwarder is used
+  function getMsgSender() internal view returns (address payable signer) {
+    signer = payable(msg.sender);
+    if (msg.data.length >= 20 && signer == switchboard) {
+      assembly {
+        signer := shr(96, calldataload(sub(calldatasize(), 20)))
+      }
     }
+  }
 }
 ```
 
@@ -406,106 +405,106 @@ Example.sol
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import {Recipient} from "./Recipient.sol";
+import { Recipient } from "./Recipient.sol";
 
 // An example of a contract where we pass some parameters to the callback function so we can
 // handle individual orders in a batch.
 contract SwitchboardParamsReceiver is Recipient {
-    // Events
-    event OrderCreated(uint256 orderId, address callId, address sender);
-    event OrderResolved(uint256 orderId, address callId, uint256 value);
+  // Events
+  event OrderCreated(uint256 orderId, address callId, address sender);
+  event OrderResolved(uint256 orderId, address callId, uint256 value);
 
-    // Errors
-    error InvalidValue(uint256 value);
-    error InvalidSender(address expected, address actual);
-    error InvalidOrder(uint256 orderId);
+  // Errors
+  error InvalidValue(uint256 value);
+  error InvalidSender(address expected, address actual);
+  error InvalidOrder(uint256 orderId);
 
-    // Structs
-    struct Order {
-        address callId;
-        address sender;
-        uint256 value;
-        bool filled;
+  // Structs
+  struct Order {
+    address callId;
+    address sender;
+    uint256 value;
+    bool filled;
+  }
+
+  // Switchboard Function Parameters
+  // This struct will be defined here, but also in the Switchboard Function itself
+  // We will abi.decode it off-chain to get the parameters
+  struct OrderParams {
+    uint256 orderId;
+    address sender;
+  }
+
+  // Constants
+  uint256 public constant EXPECTED_FUNCTION_GAS_COST = 300_000;
+
+  // State variables
+  address functionId;
+  uint256 nextOrderId;
+  mapping(uint256 => Order) public orders;
+  uint256 public latestValue;
+
+  // Pass the switchboard address and the function id to the constructor so we can validate the callback sender
+  constructor(
+    address _switchboard // Switchboard contract address
+  ) Recipient(_switchboard) {}
+
+  // Call the switchboard function with the order parameters
+  // The function will call back into fillOrder with the value
+  function createOrder() external payable {
+    // make sure the value is correct - this will make it so the downstream users
+    //  / order creators are the ones paying for the order execution
+    if (msg.value < EXPECTED_FUNCTION_GAS_COST * tx.gasprice) {
+      revert InvalidValue(msg.value);
     }
 
-    // Switchboard Function Parameters
-    // This struct will be defined here, but also in the Switchboard Function itself
-    // We will abi.decode it off-chain to get the parameters
-    struct OrderParams {
-        uint256 orderId;
-        address sender;
+    // encode the order parameters
+    bytes memory encodedOrder = abi.encode(
+      OrderParams({ orderId: nextOrderId, sender: getMsgSender() })
+    );
+
+    // call out to the swithcboard function, triggering an off-chain run
+    address callId = callSwitchboardFunction(functionId, encodedOrder);
+
+    // store the order data
+    orders[nextOrderId].sender = msg.sender;
+    orders[nextOrderId].callId = callId;
+
+    // emit an event
+    emit OrderCreated(nextOrderId, callId, getMsgSender());
+
+    // increment nextOrderId
+    nextOrderId++;
+  }
+
+  // Callback into contract with value computed off-chain
+  function fillOrder(uint256 orderId, uint256 value) external {
+    // extract the sender from the callback, this validates that the switchboard contract called this function
+    address msgSender = getMsgSender();
+
+    // if callback hasn't been hit, set it on first function run
+    if (functionId == address(0) && msg.sender == switchboard) {
+      functionId = msgSender;
     }
 
-    // Constants
-    uint256 public constant EXPECTED_FUNCTION_GAS_COST = 300_000;
-
-    // State variables
-    address functionId;
-    uint256 nextOrderId;
-    mapping(uint256 => Order) public orders;
-    uint256 public latestValue;
-
-    // Pass the switchboard address and the function id to the constructor so we can validate the callback sender
-    constructor(
-        address _switchboard // Switchboard contract address
-    ) Recipient(_switchboard) {}
-
-    // Call the switchboard function with the order parameters
-    // The function will call back into fillOrder with the value
-    function createOrder() external payable {
-        // make sure the value is correct - this will make it so the downstream users
-        //  / order creators are the ones paying for the order execution
-        if (msg.value < EXPECTED_FUNCTION_GAS_COST * tx.gasprice) {
-            revert InvalidValue(msg.value);
-        }
-
-        // encode the order parameters
-        bytes memory encodedOrder = abi.encode(
-            OrderParams({orderId: nextOrderId, sender: getMsgSender()})
-        );
-
-        // call out to the swithcboard function, triggering an off-chain run
-        address callId = callSwitchboardFunction(functionId, encodedOrder);
-
-        // store the order data
-        orders[nextOrderId].sender = msg.sender;
-        orders[nextOrderId].callId = callId;
-
-        // emit an event
-        emit OrderCreated(nextOrderId, callId, getMsgSender());
-
-        // increment nextOrderId
-        nextOrderId++;
+    // make sure the encoded caller is our function id
+    if (msgSender != functionId) {
+      revert InvalidSender(functionId, msgSender);
     }
 
-    // Callback into contract with value computed off-chain
-    function fillOrder(uint256 orderId, uint256 value) external {
-        // extract the sender from the callback, this validates that the switchboard contract called this function
-        address msgSender = getMsgSender();
-
-        // if callback hasn't been hit, set it on first function run
-        if (functionId == address(0) && msg.sender == switchboard) {
-            functionId = msgSender;
-        }
-
-        // make sure the encoded caller is our function id
-        if (msgSender != functionId) {
-            revert InvalidSender(functionId, msgSender);
-        }
-
-        // sanity check that the order has been registered
-        if (orders[orderId].sender == address(0)) {
-            revert InvalidOrder(orderId);
-        }
-
-        // fill order and mark it as filled
-        orders[orderId].value = value;
-        orders[orderId].filled = true;
-
-        latestValue = value;
-
-        // emit an event
-        emit OrderResolved(orderId, msgSender, value);
+    // sanity check that the order has been registered
+    if (orders[orderId].sender == address(0)) {
+      revert InvalidOrder(orderId);
     }
+
+    // fill order and mark it as filled
+    orders[orderId].value = value;
+    orders[orderId].filled = true;
+
+    latestValue = value;
+
+    // emit an event
+    emit OrderResolved(orderId, msgSender, value);
+  }
 }
 ```

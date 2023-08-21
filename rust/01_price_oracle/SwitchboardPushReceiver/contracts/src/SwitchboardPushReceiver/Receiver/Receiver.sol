@@ -3,24 +3,38 @@ pragma solidity ^0.8.9;
 
 import {ReceiverLib} from "./ReceiverLib.sol";
 import {Aggregator} from "./Aggregator.sol";
-import {Recipient} from "../util/Recipient.sol";
 import {ErrorLib} from "../error/ErrorLib.sol";
 import {EventLib} from "../event/EventLib.sol";
 import {AdminLib} from "../admin/AdminLib.sol";
 
+// Get the Switchboard Library - this is the Core Mainnet Deployment, you can swap this for one of the networks below
+import {Switchboard} from "@switchboard-xyz/evm.js/contracts/core/Switchboard.sol";
+
+/*
+ * NOTE: replace with one of the following imports to use an actual network deployment
+ * import {Switchboard} from "@switchboard-xyz/evm.js/contracts/core/testnet/Switchboard.sol";
+ * import {Switchboard} from "@switchboard-xyz/evm.js/contracts/core/Switchboard.sol";
+ * import {Switchboard} from "@switchboard-xyz/evm.js/contracts/arbitrum/testnet/Switchboard.sol";
+ * import {Switchboard} from "@switchboard-xyz/evm.js/contracts/arbitrum/Switchboard.sol";
+ */
+
 // Main contract for Switchboard's Pull Model
-contract Receiver is Recipient {
+contract Receiver {
     // Switchboard Function will call this function with the feed ids and values
     function callback(
         bytes32[] memory _feedNames, // feed names
         int256[] memory values, // the value of the feed
         uint256 timestamp // data timestamp
     ) external {
+        address functionId = Switchboard.getEncodedFunctionId();
         if (AdminLib.functionId() == address(0)) {
-            AdminLib.setFunctionId(getMsgSender());
+            AdminLib.setFunctionId(functionId);
         }
+
         // Assert that the sender is switchboard & the correct function id is encoded
-        verifySwitchboardFunction();
+        if (functionId != AdminLib.functionId()) {
+            revert ErrorLib.InvalidSender(AdminLib.functionId(), functionId);
+        }
 
         // make sure the input lengths are correct
         if (_feedNames.length != values.length) {
@@ -35,12 +49,15 @@ contract Receiver is Recipient {
     function failureCallback(
         bytes32[] memory _feedNames // feed names
     ) external {
+        address functionId = Switchboard.getEncodedFunctionId();
         if (AdminLib.functionId() == address(0)) {
-            AdminLib.setFunctionId(getMsgSender());
+            AdminLib.setFunctionId(functionId);
         }
 
         // Assert that the sender is switchboard & the correct function id is encoded
-        verifySwitchboardFunction();
+        if (functionId != AdminLib.functionId()) {
+            revert ErrorLib.InvalidSender(AdminLib.functionId(), functionId);
+        }
 
         // Update each feed internally
         ReceiverLib.failureCallback(_feedNames);

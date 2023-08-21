@@ -146,7 +146,7 @@ export QUEUE_ID=0x392a3217624aC36b1EC1Cf95905D49594A4DCF64 # placeholder
 export SCHEDULE="30 * * * * *" # 30 seconds
 export CONTAINER_NAME=switchboardlabs/test
 export PERMITTED_CALLERS=$SWITCHBOARD_RECEIVER_ADDRESS
-npx hardhat run scripts/create_function.ts  --network arbitrumTestnet # or coredaoTestnet
+pnpm exec hardhat run scripts/create_function.ts  --network arbitrumTestnet # or coredaoTestnet
 ```
 
 ### Adding Funding to Function
@@ -156,7 +156,7 @@ Add funds to your function by doing the following:
 ```bash
 export FUNCTION_ID=0x96cE076e3Dda35679316b12F2b5F7b4A92C9a294
 export ETH_VALUE="0.1"
-npx hardhat run scripts/extend_function.ts  --network arbitrumTestnet
+pnpm exec hardhat run scripts/extend_function.ts  --network arbitrumTestnet
 ```
 
 ### Printing Function Data
@@ -165,7 +165,7 @@ Now view your function config to ensure it is to your liking:
 
 ```bash
 export FUNCTION_ID=0x96cE076e3Dda35679316b12F2b5F7b4A92C9a294
-npx hardhat run scripts/check_function.ts  --network arbitrumTestnet
+pnpm exec hardhat run scripts/check_function.ts  --network arbitrumTestnet
 ```
 
 ## Writing Switchboard TS Functions

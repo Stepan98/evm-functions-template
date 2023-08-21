@@ -2,11 +2,10 @@
 pragma solidity ^0.8.9;
 
 import {AdminLib} from "./AdminLib.sol";
-import {Recipient} from "../util/Recipient.sol";
 import {ErrorLib} from "../error/ErrorLib.sol";
 import {LibDiamond} from "../eip2535/libraries/LibDiamond.sol";
 
-contract Admin is Recipient {
+contract Admin {
     // Initialization
     function initialize(address _switchboard) external {
         if (AdminLib.isInitialized()) {
