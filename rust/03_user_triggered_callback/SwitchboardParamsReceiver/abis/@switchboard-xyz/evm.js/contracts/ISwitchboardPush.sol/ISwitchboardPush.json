@@ -1,0 +1,11 @@
+[
+  "event NewAdapter(bytes32 indexed,address indexed,address indexed)",
+  "event NewResult(bytes32 indexed,uint80 indexed,int256,uint256)",
+  "event ReadEvent(address indexed,address indexed,int256,uint256)",
+  "function deployFeedAdapter(address,string,string)",
+  "function feeds(bytes32) view returns (tuple(address,bytes32,uint80,tuple(int256,uint256,uint256),bool,bool))",
+  "function getAllFeeds() view returns (tuple(address,bytes32,uint80,tuple(int256,uint256,uint256),bool,bool)[])",
+  "function getLatestResult(address) returns (int256, uint256, uint256, uint80)",
+  "function latestTimestamp() view returns (uint256)",
+  "function results(bytes32,uint80) view returns (tuple(int256,uint256,uint256))"
+]

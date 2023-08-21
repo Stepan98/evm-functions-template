@@ -174,13 +174,13 @@ packages:
     engines: {node: '>=14.0.0'}
     dependencies:
       '@smithy/types': 2.2.1
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@aws-sdk/util-utf8-browser@3.259.0:
     resolution: {integrity: sha512-UvFa/vR+e19XookZF8RzFZBrw2EUkQWxiBW0yYQAhvk3C+QVGl0H3ouca8LDBlBfQKXwmW3huo/59H8rwb1wJw==}
     dependencies:
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@babel/runtime@7.22.10:
@@ -1132,7 +1132,7 @@ packages:
     dependencies:
       dockerode: 2.5.8
       fs-extra: 7.0.1
-      node-fetch: 2.6.12
+      node-fetch: 2.6.13
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -1211,7 +1211,7 @@ packages:
       ethereumjs-util: 7.1.5
       minimist: 1.2.8
       proper-lockfile: 4.1.2
-      solidity-ast: 0.4.49
+      solidity-ast: 0.4.51
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -1372,7 +1372,7 @@ packages:
     resolution: {integrity: sha512-6nyDOf027ZeJiQVm6PXmLm7dR+hR2YJUkr4VwUniXA8xZUGAu5Mk0zfx2BPFrt+e5YauvlIqQoH0CsrM4tLkfg==}
     engines: {node: '>=14.0.0'}
     dependencies:
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@solana/buffer-layout@4.0.1:
@@ -1397,7 +1397,7 @@ packages:
       buffer: 6.0.3
       fast-stable-stringify: 1.0.0
       jayson: 4.1.0
-      node-fetch: 2.6.12
+      node-fetch: 2.6.13
       rpc-websockets: 7.6.0
       superstruct: 0.14.2
     transitivePeerDependencies:
@@ -1466,7 +1466,7 @@ packages:
       chalk: 5.3.0
       ethers: 5.7.2
       js-sha3: 0.8.0
-      node-fetch: 2.6.12
+      node-fetch: 2.6.13
     transitivePeerDependencies:
       - '@solana/web3.js'
       - bufferutil
@@ -2300,6 +2300,17 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
+  /array.prototype.findlast@1.2.2:
+    resolution: {integrity: sha512-p1YDNPNqA+P6cPX9ATsxg7DKir7gOmJ+jh5dEP3LlumMNYVC1F2Jgnyh6oI3n/qD9FeIkqR2jXfd73G68ImYUQ==}
+    engines: {node: '>= 0.4'}
+    dependencies:
+      call-bind: 1.0.2
+      define-properties: 1.2.0
+      es-abstract: 1.22.1
+      es-shim-unscopables: 1.0.0
+      get-intrinsic: 1.2.1
+    dev: true
+
   /array.prototype.reduce@1.0.5:
     resolution: {integrity: sha512-kDdugMl7id9COE8R7MHF5jWk7Dqt/fs4Pv+JXoICnYwqpjjjbUurz6w5fT5IG6brLdJhv6/VoHB0H7oyIBXd+Q==}
     engines: {node: '>= 0.4'}
@@ -2874,7 +2885,7 @@ packages:
       normalize-path: 3.0.0
       readdirp: 3.6.0
     optionalDependencies:
-      fsevents: 2.3.2
+      fsevents: 2.3.3
     dev: true
 
   /chownr@1.1.4:
@@ -3192,7 +3203,7 @@ packages:
   /cross-fetch@3.1.8:
     resolution: {integrity: sha512-cvA+JwZoU0Xq+h6WkMvAUqPEYy92Obet6UdKLfW60qn99ftItKjB5T+BkyWOFWe2pUyfQ+IJHmpOTznqk1M6Kg==}
     dependencies:
-      node-fetch: 2.6.12
+      node-fetch: 2.6.13
     transitivePeerDependencies:
       - encoding
     dev: true
@@ -3351,7 +3362,7 @@ packages:
       async-retry: 1.3.3
       axios: 0.21.4(debug@4.3.4)
       lodash: 4.17.21
-      node-fetch: 2.6.12
+      node-fetch: 2.6.13
     transitivePeerDependencies:
       - debug
       - encoding
@@ -3631,6 +3642,12 @@ packages:
       get-intrinsic: 1.2.1
       has: 1.0.3
       has-tostringtag: 1.0.0
+    dev: true
+
+  /es-shim-unscopables@1.0.0:
+    resolution: {integrity: sha512-Jm6GPcCdC30eMLbZ2x8z2WuRwAws3zTBBKuusffYVUrNj/GVSUAZ+xKMaUpfNDR5IbyNA5LJbaecoUVbmUcB1w==}
+    dependencies:
+      has: 1.0.3
     dev: true
 
   /es-to-primitive@1.2.1:
@@ -4406,8 +4423,8 @@ packages:
     dev: true
     optional: true
 
-  /fsevents@2.3.2:
-    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+  /fsevents@2.3.3:
+    resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
     requiresBuild: true
@@ -5349,7 +5366,7 @@ packages:
   /isomorphic-unfetch@3.1.0:
     resolution: {integrity: sha512-geDJjpoZ8N0kWexiwkX8F9NkTsXhetLPVbZFQ+JTW239QNOwvB0gniuR1Wc6f0AMTn7/mFGyXvHTifrCp/GH8Q==}
     dependencies:
-      node-fetch: 2.6.12
+      node-fetch: 2.6.13
       unfetch: 4.2.0
     transitivePeerDependencies:
       - encoding
@@ -6115,8 +6132,8 @@ packages:
       semver: 5.7.2
     dev: true
 
-  /node-fetch@2.6.12:
-    resolution: {integrity: sha512-C/fGU2E8ToujUivIO0H+tpQ6HWo4eEmchoPIoXtxCrVghxdKq+QOHqEZW7tuP3KlV3bC8FRMO5nMCC7Zm1VP6g==}
+  /node-fetch@2.6.13:
+    resolution: {integrity: sha512-StxNAxh15zr77QvvkmveSQ8uCQ4+v5FkvNTj0OESmiHu+VRi/gXArXtkWMElOsOUNLtUEvI4yS+rdtOHZTwlQA==}
     engines: {node: 4.x || >=6.0.0}
     peerDependencies:
       encoding: ^0.1.0
@@ -6473,7 +6490,7 @@ packages:
       axios: 0.21.4(debug@4.3.4)
       defender-base-client: 1.44.0(debug@4.3.4)
       lodash: 4.17.21
-      node-fetch: 2.6.12
+      node-fetch: 2.6.13
     transitivePeerDependencies:
       - debug
       - encoding
@@ -7234,8 +7251,10 @@ packages:
       - debug
     dev: true
 
-  /solidity-ast@0.4.49:
-    resolution: {integrity: sha512-Pr5sCAj1SFqzwFZw1HPKSq0PehlQNdM8GwKyAVYh2DOn7/cCK8LUKD1HeHnKtTgBW7hi9h4nnnan7hpAg5RhWQ==}
+  /solidity-ast@0.4.51:
+    resolution: {integrity: sha512-Mql4HTY3ce2t8YW6cGjq8dKKRT9D38D3TB/lOfIhgbfXx/cCFG2clXgqWuOfXGX9t6fhOPFvcVZhj2b6n30VBA==}
+    dependencies:
+      array.prototype.findlast: 1.2.2
     dev: true
 
   /solidity-comments-extractor@0.0.7:
@@ -7803,8 +7822,8 @@ packages:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
     dev: true
 
-  /tslib@2.6.1:
-    resolution: {integrity: sha512-t0hLfiEKfMUoqhG+U1oid7Pva4bbDPHYfJNiB7BiIjRkj1pyC++4N3huJfqY6aRH6VTB0rvtzQwjM4K6qpfOig==}
+  /tslib@2.6.2:
+    resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
     dev: true
 
   /tslog@4.9.1:

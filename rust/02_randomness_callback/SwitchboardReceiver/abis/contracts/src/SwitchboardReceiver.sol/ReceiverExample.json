@@ -1,5 +1,5 @@
 [
-  "constructor(address)",
+  "error InvalidSender(address,address)",
   "event NewRandomValue(uint256)",
   "function callback(uint256)",
   "function randomValue() view returns (uint256)"

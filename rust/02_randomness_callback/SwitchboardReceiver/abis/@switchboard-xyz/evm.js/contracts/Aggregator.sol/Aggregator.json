@@ -1,0 +1,15 @@
+[
+  "constructor(address,address,bytes32,string,string)",
+  "error RoundEmpty(bytes32,uint80)",
+  "function decimals() pure returns (uint8)",
+  "function description() view returns (string)",
+  "function feedId() view returns (address)",
+  "function feedName() view returns (bytes32)",
+  "function getRoundData(uint80) view returns (uint80, int256, uint256, uint256, uint80)",
+  "function latestRoundData() view returns (uint80, int256, uint256, uint256, uint80)",
+  "function name() view returns (string)",
+  "function switchboardPricesContract() view returns (address)",
+  "function version() pure returns (uint256)",
+  "function viewLatestRoundData() view returns (uint80, int256, uint256, uint256, uint80)",
+  "function viewRoundData(uint80) view returns (uint80, int256, uint256, uint256, uint80)"
+]
