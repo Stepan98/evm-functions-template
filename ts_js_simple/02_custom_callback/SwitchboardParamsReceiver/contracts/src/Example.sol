@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import {FunctionsClient} from "./FunctionsClient.sol";
+import {FunctionsClient} from "@switchboard-xyz/evm.js/contracts/FunctionsClient.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract ReceiverExample is FunctionsClient {
@@ -26,7 +26,6 @@ contract ReceiverExample is FunctionsClient {
     uint256 public constant EXPECTED_FUNCTION_GAS_COST = 300_000;
 
     // State variables
-    address functionId;
     uint256 nextOrderId;
     mapping(uint256 => Order) public orders;
     mapping(address => uint256) public callIdToOrderId;

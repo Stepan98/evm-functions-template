@@ -1,7 +1,8 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import {FunctionsClient} from "./FunctionsClient.sol";
+// Get the Switchboard Library - this is the Core Mainnet Deployment, you can swap this for one of the networks below
+import {FunctionsClient} from "@switchboard-xyz/evm.js/contracts/FunctionsClient.sol";
 
 contract ReceiverExample is FunctionsClient {
     uint256 public randomValue;

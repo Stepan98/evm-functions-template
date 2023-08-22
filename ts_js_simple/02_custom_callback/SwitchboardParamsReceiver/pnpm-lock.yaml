@@ -1,7 +1,7 @@
 lockfileVersion: '6.0'
 
 settings:
-  autoInstallPeers: true
+  autoInstallPeers: false
   excludeLinksFromLockfile: false
 
 dependencies:
@@ -56,8 +56,8 @@ devDependencies:
     specifier: ^2.2.3
     version: 2.2.3
   '@switchboard-xyz/evm.js':
-    specifier: 3.12.11
-    version: 3.12.11(@solana/web3.js@1.78.4)
+    specifier: 3.12.29
+    version: 3.12.29
   '@tenderly/hardhat-tenderly':
     specifier: ^1.7.3
     version: 1.7.3(hardhat@2.17.1)(ts-node@10.9.1)(typescript@5.0.4)
@@ -66,7 +66,7 @@ devDependencies:
     version: 0.2.3(hardhat@2.17.1)
   '@typechain/ethers-v5':
     specifier: ^10.2.0
-    version: 10.2.0(@ethersproject/abi@5.7.0)(@ethersproject/bytes@5.7.0)(@ethersproject/providers@5.7.2)(ethers@5.7.2)(typechain@8.1.1)(typescript@5.0.4)
+    version: 10.2.0(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(ethers@5.7.2)(typechain@8.1.1)(typescript@5.0.4)
   '@typechain/hardhat':
     specifier: ^6.1.5
     version: 6.1.5(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@typechain/ethers-v5@10.2.0)(ethers@5.7.2)(hardhat@2.17.1)(typechain@8.1.1)
@@ -262,13 +262,12 @@ packages:
     dev: true
     optional: true
 
-  /@coral-xyz/borsh@0.28.0(@solana/web3.js@1.78.4):
+  /@coral-xyz/borsh@0.28.0:
     resolution: {integrity: sha512-/u1VTzw7XooK7rqeD7JLUSwOyRSesPUk0U37BV9zK0axJc1q0nRbKFGFLYCQ16OtdOJTTwGfGp11Lx9B45bRCQ==}
     engines: {node: '>=10'}
     peerDependencies:
       '@solana/web3.js': ^1.68.0
     dependencies:
-      '@solana/web3.js': 1.78.4
       bn.js: 5.2.1
       buffer-layout: 1.2.2
     dev: true
@@ -992,7 +991,7 @@ packages:
       '@nomicfoundation/hardhat-network-helpers': 1.0.8(hardhat@2.17.1)
       '@nomiclabs/hardhat-ethers': 2.2.3(ethers@5.7.2)(hardhat@2.17.1)
       '@nomiclabs/hardhat-etherscan': 3.1.7(hardhat@2.17.1)
-      '@typechain/ethers-v5': 10.2.0(@ethersproject/abi@5.7.0)(@ethersproject/bytes@5.7.0)(@ethersproject/providers@5.7.2)(ethers@5.7.2)(typechain@8.1.1)(typescript@5.0.4)
+      '@typechain/ethers-v5': 10.2.0(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(ethers@5.7.2)(typechain@8.1.1)(typescript@5.0.4)
       '@typechain/hardhat': 6.1.5(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@typechain/ethers-v5@10.2.0)(ethers@5.7.2)(hardhat@2.17.1)(typechain@8.1.1)
       '@types/chai': 4.3.5
       '@types/mocha': 10.0.1
@@ -1408,11 +1407,11 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@switchboard-xyz/common@2.3.0(@solana/web3.js@1.78.4):
-    resolution: {integrity: sha512-MIjsHv71tFyj6ZAVme35Con0IYTXMeGhWOzcc6s2oK6vPLTDiLMoS2DO0Ih/2y//O/m1Bz+YbSbXWbpSjvuP2g==}
+  /@switchboard-xyz/common@2.3.2:
+    resolution: {integrity: sha512-Vv/Som+QmOOpbvCTWO/FwJ9Bz6yYqBbLqo9T5UuO2JHqL/pBcvTrJGK2ERizTv3UEuHF7Z6zl0k/rdN+11hnyw==}
     engines: {node: '>=12'}
     dependencies:
-      '@coral-xyz/borsh': 0.28.0(@solana/web3.js@1.78.4)
+      '@coral-xyz/borsh': 0.28.0
       '@types/big.js': 6.2.0
       '@types/bn.js': 5.1.1
       big.js: 6.2.1
@@ -1426,14 +1425,14 @@ packages:
       - '@solana/web3.js'
     dev: true
 
-  /@switchboard-xyz/evm.js@3.12.11(@solana/web3.js@1.78.4):
-    resolution: {integrity: sha512-Qo9/NnP5QUYNBR0xzYmS5BImt/1in7QXVFtH3tuFjnJGmxfGbLHhbxcOoaKOfHzm5FM2buiIkTeDSZ7AI4/BKw==}
+  /@switchboard-xyz/evm.js@3.12.29:
+    resolution: {integrity: sha512-VW3ocpx/3HJqHyksttfRpVpvU7l/xdwFNSicalBXudFnTZ7RD/dVLymxAkWjx8mEjreYv7vRjW+ZbEpg4cN47g==}
     engines: {node: '>=12.0.0'}
     dependencies:
       '@ethersproject/abi': 5.7.0
       '@ethersproject/bignumber': 5.7.0
       '@ethersproject/providers': 5.7.2
-      '@switchboard-xyz/common': 2.3.0(@solana/web3.js@1.78.4)
+      '@switchboard-xyz/common': 2.3.2
       chalk: 5.3.0
       ethers: 5.7.2
       js-sha3: 0.8.0
@@ -1690,7 +1689,7 @@ packages:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
     dev: true
 
-  /@typechain/ethers-v5@10.2.0(@ethersproject/abi@5.7.0)(@ethersproject/bytes@5.7.0)(@ethersproject/providers@5.7.2)(ethers@5.7.2)(typechain@8.1.1)(typescript@5.0.4):
+  /@typechain/ethers-v5@10.2.0(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(ethers@5.7.2)(typechain@8.1.1)(typescript@5.0.4):
     resolution: {integrity: sha512-ikaq0N/w9fABM+G01OFmU3U3dNnyRwEahkdvi9mqy1a3XwKiPZaF/lu54OcNaEWnpvEYyhhS0N7buCtLQqC92w==}
     peerDependencies:
       '@ethersproject/abi': ^5.0.0
@@ -1701,7 +1700,6 @@ packages:
       typescript: '>=4.3.0'
     dependencies:
       '@ethersproject/abi': 5.7.0
-      '@ethersproject/bytes': 5.7.0
       '@ethersproject/providers': 5.7.2
       ethers: 5.7.2
       lodash: 4.17.21
@@ -1722,7 +1720,7 @@ packages:
     dependencies:
       '@ethersproject/abi': 5.7.0
       '@ethersproject/providers': 5.7.2
-      '@typechain/ethers-v5': 10.2.0(@ethersproject/abi@5.7.0)(@ethersproject/bytes@5.7.0)(@ethersproject/providers@5.7.2)(ethers@5.7.2)(typechain@8.1.1)(typescript@5.0.4)
+      '@typechain/ethers-v5': 10.2.0(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(ethers@5.7.2)(typechain@8.1.1)(typescript@5.0.4)
       ethers: 5.7.2
       fs-extra: 9.1.0
       hardhat: 2.17.1(ts-node@10.9.1)(typescript@5.0.4)
@@ -2112,10 +2110,8 @@ packages:
       indent-string: 4.0.0
     dev: true
 
-  /ajv-formats@2.1.1(ajv@8.12.0):
+  /ajv-formats@2.1.1:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
-    peerDependencies:
-      ajv: ^8.0.0
     peerDependenciesMeta:
       ajv:
         optional: true
@@ -3065,7 +3061,7 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       ajv: 8.12.0
-      ajv-formats: 2.1.1(ajv@8.12.0)
+      ajv-formats: 2.1.1
       atomically: 1.7.0
       debounce-fn: 4.0.0
       dot-prop: 6.0.1
