@@ -7,7 +7,7 @@ async function main() {
   const diamondAddress =
     process.env.SWITCHBOARD_ADDRESS ?? process.env.DIAMOND_ADDRESS ?? "";
 
-  const schedule = process.env.SCHEDULE;
+  const schedule = process.env.SCHEDULE ?? "";
   const container = process.env.CONTAINER_NAME;
   const queueId = process.env.QUEUE_ID;
   const ethValue = process.env.ETH_VALUE ?? "0.1";
@@ -25,10 +25,11 @@ async function main() {
   }
 
   if (!schedule) {
-    throw new Error(
-      'Please set the schedule, ex: export SCHEDULE="* * * * * *"'
+    console.log(
+      '[INFO] SCHEDULE not set. If you want to set the schedule, set with: export SCHEDULE="* * * * * *"'
     );
   }
+
 
   if (!container) {
     throw new Error(
