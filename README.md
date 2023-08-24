@@ -37,6 +37,10 @@ Switchboard Functions provide a powerful solution for blockchain developers seek
 
 - **Multiple Integration Approaches**: Switchboard Functions support multiple programming languages and approaches for function creation, including Typescript, Javascript, and Rust. This accommodates a wide range of developer preferences and skill levels.
 
+## Deployments
+
+You can find the latest deployments of the Switchboard Contract, Queues (subnets that functions live on), and Switchboard Push Function addresses [in the core-sdk repo network configs](https://github.com/switchboard-xyz/core-sdk/tree/main/javascript/common/src/networks).
+
 ## Creating Switchboard Functions
 
 ### 1. Typescript

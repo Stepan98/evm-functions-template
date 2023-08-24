@@ -1,9 +1,14 @@
 import { ethers } from "hardhat";
-import { SwitchboardProgram, FunctionAccount } from "@switchboard-xyz/evm.js";
+import {
+  SwitchboardProgram,
+  FunctionAccount,
+  AttestationQueueAccount,
+} from "@switchboard-xyz/evm.js";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
 
+  // from https://github.com/switchboard-xyz/core-sdk/tree/main/javascript/common/src/networks
   const diamondAddress =
     process.env.SWITCHBOARD_ADDRESS ?? process.env.DIAMOND_ADDRESS ?? "";
 
@@ -13,7 +18,9 @@ async function main() {
   const ethValue = process.env.ETH_VALUE ?? "0.1";
 
   // empty permittedCallers can be called by anyone (default)
-  const permittedCallers = process.env.PERMITTED_CALLERS ? process.env.PERMITTED_CALLERS.split(',') : [];
+  const permittedCallers = process.env.PERMITTED_CALLERS
+    ? process.env.PERMITTED_CALLERS.split(",")
+    : [];
 
   let functionId =
     process.env.FUNCTION_ID ?? ethers.Wallet.createRandom().address;
@@ -47,6 +54,18 @@ async function main() {
     diamondAddress
   );
 
+  const attestationQueue = new AttestationQueueAccount(
+    switchboardProgram,
+    queueId
+  );
+
+  const queueData = await attestationQueue.loadData();
+  console.log(queueData);
+  console.log(functionId);
+  console.log(deployer.address!);
+  console.log(queueId);
+  console.log(container);
+  console.log(schedule);
   const [func, tx] = await FunctionAccount.create(
     switchboardProgram,
     {
@@ -58,9 +77,9 @@ async function main() {
       container: container!,
       schedule: schedule!,
       version: "latest",
-      permittedCallers: 
+      permittedCallers,
     },
-    { value: ethers.utils.parseEther(ethValue) }
+    { value: ethers.utils.parseEther("0.1") }
   );
 
   const receipt = await tx.wait();

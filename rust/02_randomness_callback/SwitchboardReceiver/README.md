@@ -82,8 +82,13 @@ When you deploy this contract, it will await to be bound to a switchboard functi
 
 #### Picking a network and setting up your environment
 
-- navigate to the [Project README.md](../../README.md) and find the switchboard deployment address
+- navigate to the [Project README.md](../../../README.md) and find the switchboard deployment address
 - set the `SWITCHBOARD_ADDRESS` env variable to target whichever address is appropriate for the network you're targetting
+
+``
+First, edit the Switchboard import used in your contract in [SwitchboardReceiver](./contracts/src/SwitchboardReceiver.sol) to target the switchboard address for the chain/network you're using.
+
+````solidity
 
 To first deploy the contract, run:
 
@@ -93,7 +98,7 @@ To first deploy the contract, run:
 # pnpm deploy:coredaomain
 # pnpm deploy:arbitrumtestnet
 pnpm deploy:${NETWORK_NAME}
-```
+````
 
 More deploy commands are available in [package.json](./package.json) scripts.
 
@@ -123,7 +128,7 @@ You'll also need to pick a container name that your switchboard function will us
 export CONTAINER_NAME=your_docker_username/switchboard-function
 ```
 
-Here, set the name of your container to deploy and run `make build`
+Here, set the name of your container to deploy and run `make publish`
 
 After this is published, you are free to make your function account to set the rate of run for the function.
 

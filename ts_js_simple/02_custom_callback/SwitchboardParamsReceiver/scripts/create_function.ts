@@ -12,6 +12,8 @@ async function main() {
   const queueId = process.env.QUEUE_ID;
   const ethValue = process.env.ETH_VALUE ?? "0.1";
 
+  console.log(diamondAddress, schedule, container, queueId, ethValue);
+
   // empty permittedCallers can be called by anyone (default)
   const permittedCallers = process.env.PERMITTED_CALLERS
     ? process.env.PERMITTED_CALLERS.split(",")

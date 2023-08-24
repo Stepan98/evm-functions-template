@@ -2,7 +2,9 @@
 pragma solidity ^0.8.9;
 
 // Get the Switchboard Library - this is the Core Mainnet Deployment, you can swap this for one of the networks below
-import {Switchboard} from "@switchboard-xyz/evm.js/contracts/core/Switchboard.sol";
+import {Switchboard} from "@switchboard-xyz/evm.js/contracts/core/testnet/Switchboard.sol";
+
+// import {Switchboard} from "@switchboard-xyz/evm.js/contracts/core/Switchboard.sol";
 
 /*
  * NOTE: replace with one of the following imports to use an actual network deployment
@@ -13,7 +15,7 @@ import {Switchboard} from "@switchboard-xyz/evm.js/contracts/core/Switchboard.so
  * etc...
  */
 
-contract ReceiverExample {
+contract SwitchboardReceiver {
     uint256 public randomValue;
     address functionId;
 
