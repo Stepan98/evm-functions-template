@@ -90,8 +90,26 @@ When you deploy this contract, it will await to be bound to a switchboard functi
 
 #### Picking a network and setting up your environment
 
-- navigate to the [Project README.md](../../README.md) and find the switchboard deployment address
+- navigate to the [Project README.md](../../../README.md) and find the switchboard deployment address
 - set the `SWITCHBOARD_ADDRESS` env variable to target whichever address is appropriate for the network you're targetting
+
+First, edit the Switchboard import used in your contract in [SwitchboardReceiver](./contracts/src/SwitchboardReceiver.sol) to target the switchboard address for the chain/network you're using.
+
+```solidity
+// Core Testnet
+import { Switchboard } from "@switchboard-xyz/evm.js/contracts/core/testnet/Switchboard.sol";
+
+// Core Mainnet
+import { Switchboard } from "@switchboard-xyz/evm.js/contracts/core/Switchboard.sol";
+// or import { Switchboard } from "@switchboard-xyz/evm.js/contracts/core/mainnet/Switchboard.sol";
+
+// Arbitrum Testnet
+import { Switchboard } from "@switchboard-xyz/evm.js/contracts/arbitrum/testnet/Switchboard.sol";
+
+// Arbitrum Mainnet
+import { Switchboard } from "@switchboard-xyz/evm.js/contracts/arbitrum/Switchboard.sol";
+// or import { Switchboard } from "@switchboard-xyz/evm.js/contracts/arbitrum/mainnet/Switchboard.sol";
+```
 
 To first deploy the contract, run:
 
@@ -213,32 +231,36 @@ async function main() {
   // get all the callId / params pairs (each callId has associated params)
   const paramsResults = runner.params(paramsSchema);
 
-  // list of blocked senders 
-  const blockedSenders = new Set(["0x0000000000000000000000000000000000000000"])
+  // list of blocked senders
+  const blockedSenders = new Set([
+    "0x0000000000000000000000000000000000000000",
+  ]);
 
   // map paramsResults to calls
-  const calls = await Promise.all(paramsResults.map(async (paramsResult) => {
-    const { callId, params } = paramsResult;
+  const calls = await Promise.all(
+    paramsResults.map(async (paramsResult) => {
+      const { callId, params } = paramsResult;
 
-    if (!params) {
-      return undefined;
-    }
+      if (!params) {
+        return undefined;
+      }
 
-    const orderId: BigNumber = params.orderId;
-    const sender: string = params.sender;
+      const orderId: BigNumber = params.orderId;
+      const sender: string = params.sender;
 
-    // check if sender is blocked
-    if (blockedSenders.has(sender)) {
-      return undefined;
-    }
+      // check if sender is blocked
+      if (blockedSenders.has(sender)) {
+        return undefined;
+      }
 
-    // get random uint256
-    const randomBytes = utils.randomBytes(32);
-    const bn = BigNumber.from(Array.from(randomBytes));
+      // get random uint256
+      const randomBytes = utils.randomBytes(32);
+      const bn = BigNumber.from(Array.from(randomBytes));
 
-    // get txn
-    return contract.populateTransaction.fillOrder(orderId, bn);
-  }));
+      // get txn
+      return contract.populateTransaction.fillOrder(orderId, bn);
+    })
+  );
 
   const contract = new Contract(
     "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
@@ -252,7 +274,6 @@ async function main() {
 
 // run switchboard function
 main();
-
 ```
 
 ### Testing your function
@@ -289,6 +310,7 @@ In order to do this you'll need to know the switchboard address you're using, an
 ### Receiver Example
 
 ISwitchboard.sol
+
 ```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;

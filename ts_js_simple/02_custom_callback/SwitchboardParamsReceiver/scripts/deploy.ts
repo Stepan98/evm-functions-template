@@ -10,7 +10,7 @@ async function main() {
   await contract.deployed();
   console.log("SwitchboardParamsReceiver deployed to:", contract.address);
   console.log(
-    `plrease run: export SWITCHBOARD_RECEIVER_ADDRESS=${diamondAddress}`
+    `plrease run: export SWITCHBOARD_RECEIVER_ADDRESS=${contract.address}`
   );
 }
 

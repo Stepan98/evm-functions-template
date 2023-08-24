@@ -85,10 +85,23 @@ When you deploy this contract, it will await to be bound to a switchboard functi
 - navigate to the [Project README.md](../../../README.md) and find the switchboard deployment address
 - set the `SWITCHBOARD_ADDRESS` env variable to target whichever address is appropriate for the network you're targetting
 
-``
 First, edit the Switchboard import used in your contract in [SwitchboardReceiver](./contracts/src/SwitchboardReceiver.sol) to target the switchboard address for the chain/network you're using.
 
-````solidity
+```solidity
+// Core Testnet
+import { Switchboard } from "@switchboard-xyz/evm.js/contracts/core/testnet/Switchboard.sol";
+
+// Core Mainnet
+import { Switchboard } from "@switchboard-xyz/evm.js/contracts/core/Switchboard.sol";
+// or import { Switchboard } from "@switchboard-xyz/evm.js/contracts/core/mainnet/Switchboard.sol";
+
+// Arbitrum Testnet
+import { Switchboard } from "@switchboard-xyz/evm.js/contracts/arbitrum/testnet/Switchboard.sol";
+
+// Arbitrum Mainnet
+import { Switchboard } from "@switchboard-xyz/evm.js/contracts/arbitrum/Switchboard.sol";
+// or import { Switchboard } from "@switchboard-xyz/evm.js/contracts/arbitrum/mainnet/Switchboard.sol";
+```
 
 To first deploy the contract, run:
 
@@ -98,7 +111,7 @@ To first deploy the contract, run:
 # pnpm deploy:coredaomain
 # pnpm deploy:arbitrumtestnet
 pnpm deploy:${NETWORK_NAME}
-````
+```
 
 More deploy commands are available in [package.json](./package.json) scripts.
 
