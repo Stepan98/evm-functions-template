@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 // Get the Switchboard Library - this is the Core Mainnet Deployment, you can swap this for one of the networks below
 import {FunctionsClient} from "@switchboard-xyz/evm.js/contracts/FunctionsClient.sol";
 
-contract ReceiverExample is FunctionsClient {
+contract SwitchboardReceiver is FunctionsClient {
     uint256 public randomValue;
 
     event NewRandomValue(uint256 value);

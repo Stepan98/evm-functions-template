@@ -4,9 +4,7 @@ async function main() {
   const diamondAddress =
     process.env.SWITCHBOARD_ADDRESS ?? process.env.DIAMOND_ADDRESS ?? "";
 
-  const contract = await ethers.deployContract("SwitchboardParamsReceiver", [
-    diamondAddress, // switchboard address,
-  ]);
+  const contract = await ethers.deployContract("SwitchboardParamsReceiver");
   await contract.deployed();
   console.log("SwitchboardParamsReceiver deployed to:", contract.address);
   console.log(

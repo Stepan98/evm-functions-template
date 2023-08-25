@@ -13,7 +13,9 @@ async function main() {
   const ethValue = process.env.ETH_VALUE ?? "0.1";
 
   // empty permittedCallers can be called by anyone (default)
-  const permittedCallers = process.env.PERMITTED_CALLERS ? process.env.PERMITTED_CALLERS.split(',') : [];
+  const permittedCallers = process.env.PERMITTED_CALLERS
+    ? process.env.PERMITTED_CALLERS.split(",")
+    : [];
 
   let functionId =
     process.env.FUNCTION_ID ?? ethers.Wallet.createRandom().address;
@@ -29,7 +31,6 @@ async function main() {
       '[INFO] SCHEDULE not set. If you want to set the schedule, set with: export SCHEDULE="* * * * * *"'
     );
   }
-
 
   if (!container) {
     throw new Error(
@@ -59,7 +60,7 @@ async function main() {
       container: container!,
       schedule: schedule!,
       version: "latest",
-      permittedCallers: 
+      permittedCallers,
     },
     { value: ethers.utils.parseEther(ethValue) }
   );
