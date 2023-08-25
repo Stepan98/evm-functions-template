@@ -9,7 +9,7 @@ DOCKER_BUILD_COMMAND=DOCKER_BUILDKIT=1 docker buildx build --platform linux/amd6
 all: build
 
 docker_build:
-	pnpm build && ${DOCKER_BUILD_COMMAND} --pull -f Dockerfile -t ${CONTAINER_NAME}:dev --load ./
+	${DOCKER_BUILD_COMMAND} -f Dockerfile -t ${CONTAINER_NAME}:dev --load ./
 docker_publish:
 	${DOCKER_BUILD_COMMAND} --pull -f Dockerfile -t ${CONTAINER_NAME} --push ./
 

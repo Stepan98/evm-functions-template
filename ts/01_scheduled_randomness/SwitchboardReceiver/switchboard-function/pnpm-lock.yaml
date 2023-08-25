@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 dependencies:
   '@switchboard-xyz/evm.js':
     specifier: 3.12.14
@@ -23,9 +19,6 @@ dependencies:
   node-fetch:
     specifier: ^2.1.6
     version: 2.2.0
-  typescript:
-    specifier: ^5.1.6
-    version: 5.1.6
 
 devDependencies:
   '@types/big.js':
@@ -49,6 +42,9 @@ devDependencies:
   ts-mocha:
     specifier: ^10.0.0
     version: 10.0.0(mocha@10.1.0)
+  typescript:
+    specifier: ^5.1.6
+    version: 5.1.6
   yaml:
     specifier: ^2.1.1
     version: 2.1.1
@@ -1740,7 +1736,7 @@ packages:
     resolution: {integrity: sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: false
+    dev: true
 
   /utf-8-validate@5.0.10:
     resolution: {integrity: sha512-Z6czzLq4u8fPOyx7TU6X3dvUZVvoJmxSQ+IcrlmagKhilxlhZgxPK6C5Jqbkw1IDUmFTM+cz9QDnnLTwDz/2gQ==}
@@ -1877,3 +1873,7 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: true
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false

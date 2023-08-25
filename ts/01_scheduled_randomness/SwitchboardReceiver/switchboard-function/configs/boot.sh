@@ -5,6 +5,10 @@
 
 set -eo pipefail
 set +u
+(
+AESM_PATH=/opt/intel/sgx-aesm-service/aesm LD_LIBRARY_PATH=/opt/intel/sgx-aesm-service/aesm exec /opt/intel/sgx-aesm-service/aesm/aesm_service --no-syslog
+)
+
 
 nodejs_flag=false
 if [[ -n "${SGX_NODEJS}" ]]; then
