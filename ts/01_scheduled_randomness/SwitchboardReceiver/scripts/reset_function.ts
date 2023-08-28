@@ -41,12 +41,12 @@ async function main() {
   // FUND FUNCTION
   const tx = await switchboardProgram.sb.setFunctionConfig(
     functionId,
-    "try #4",
+    "try #6",
     deployer.address,
     "dockerhub",
     containerName,
     "latest",
-    "* 1 * * * *",
+    "* * * * * *",
     "",
     []
   );

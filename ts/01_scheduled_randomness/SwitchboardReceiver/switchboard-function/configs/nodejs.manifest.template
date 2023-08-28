@@ -10,31 +10,23 @@ loader.log_level = "{{ log_level }}"
 loader.env.LD_LIBRARY_PATH = "/lib:{{ arch_libdir }}:/usr/lib:/usr/{{ arch_libdir }}"
 loader.env.PATH = "/bin:/usr/bin"
 
-loader.env.AMAZON_PAYER_SECRET_PATH = { passthrough = true }
-loader.env.AZURE_PAYER_SECRET_PATH = { passthrough = true }
-loader.env.CHAIN = { passthrough = true }
+loader.env.IS_SIMULATION = { passthrough = true }
 loader.env.CLUSTER = { passthrough = true }
-loader.env.DISABLE_NONCE_QUEUE = { passthrough = true }
-loader.env.DOCKER_PAYER_SECRET = { passthrough = true }
-loader.env.FS_PAYER_SECRET_PATH = { passthrough = true }
-loader.env.GOOGLE_PAYER_SECRET_PATH = { passthrough = true }
-loader.env.GSM_PAYER_SECRET = { passthrough = true }
-loader.env.HOME = { passthrough = true }
-loader.env.NODE_OPTIONS = { passthrough = true }
-loader.env.PAYER_SECRET = { passthrough = true }
-loader.env.QUEUE = { passthrough = true }
-loader.env.ORACLE_QUEUE_KEY = { passthrough = true }
-loader.env.ORACLE_KEY = { passthrough = true }
-loader.env.EVM_ORACLE_KEY = { passthrough = true }
-loader.env.SAS_QUEUE = { passthrough = true }
 loader.env.RPC_URL = { passthrough = true }
-loader.env.SOLANA_ORACLE_QUEUE_KEY = { passthrough = true }
-loader.env.TASK_RUNNER_SOLANA_RPC = { passthrough = true }
-loader.env.GOOGLE_APPLICATION_CREDENTIALS = { passthrough = true }
-loader.env.PROGRAM_ID = { passthrough = true }
+loader.env.PAYER = { passthrough = true }
+loader.env.FUNCTION_KEY = { passthrough = true }
+loader.env.FUNCTION_DATA = { passthrough = true }
+loader.env.FUNCTION_REQUEST_KEY = { passthrough = true }
+loader.env.FUNCTION_REQUEST_DATA = { passthrough = true }
+loader.env.QUEUE_AUTHORITY = { passthrough = true }
+loader.env.VERIFIER = { passthrough = true }
+loader.env.VERIFIER_ENCLAVE_SIGNER = { passthrough = true }
+loader.env.REWARD_RECEIVER = { passthrough = true }
 loader.env.CHAIN_ID = { passthrough = true }
-loader.env.TELEMETRY_FEED_RESULT_PUSH_INTERVAL_MS = { passthrough = true }
-loader.env.TELEMETRY_FEED_RESULT_PUSH_URL = { passthrough = true }
+loader.env.VERIFYING_CONTRACT = { passthrough = true }
+loader.env.FUNCTION_PARAMS = { passthrough = true }
+loader.env.FUNCTION_CALL_IDS = { passthrough = true }
+
 
 fs.mounts = [
   { uri = "file:{{ gramine.runtimedir() }}", path = "/lib" },
@@ -42,7 +34,6 @@ fs.mounts = [
   { uri = "file:/usr", path = "/usr" },
   { uri = "file:/lib64", path = "/lib64" },
   { uri = "file:/usr/lib/ssl/certs", path = "/usr/lib/ssl/certs" },
-  { uri = "file:/home/credentials", path = "/home/credentials" },
   # Key options:
   # _sgx_mrenclave, anyone with the same enclave signature can unseal
   # _sgx_mrsigner, only the same physical machine AND running the same image can seal/unseal
@@ -87,7 +78,6 @@ sgx.trusted_files = [
 
 sgx.allowed_files = [
   "file:/var/run/aesmd/aesm.socket",
-  "file:/home/credentials/gcp-sa.json",
   "file:/etc/hosts",
   "file:/etc/host.conf",
   "file:/etc/gai.conf",
