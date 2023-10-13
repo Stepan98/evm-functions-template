@@ -7,8 +7,6 @@ import {ISwitchboard} from "@switchboard-xyz/evm.js/contracts/ISwitchboard.sol";
 // An example of a contract where we pass some parameters to the callback function so we can
 // handle individual orders in a batch.
 contract SwitchboardParamsReceiver {
-    address public constant SWITCH = 0xf9BD4FA5152b029576F33565Afb676da98Dd0563;
-
     // Events
     event OrderCreated(uint256 orderId, address callId, address sender);
     event OrderResolved(uint256 orderId, address callId, uint256 value);
@@ -40,12 +38,14 @@ contract SwitchboardParamsReceiver {
     uint256 public constant EXPECTED_FUNCTION_GAS_COST = 300_000;
 
     // State variables
+    address switchboardAddress;
     address functionId;
     uint256 nextOrderId;
     mapping(uint256 => Order) public orders;
     uint256 public latestValue;
 
-    constructor() {
+    constructor(address _switchboard) {
+        switchboardAddress = _switchboard;
         nextOrderId = 1;
     }
 
@@ -64,10 +64,9 @@ contract SwitchboardParamsReceiver {
         );
 
         // call out to the swithcboard function, triggering an off-chain run
-        address callId = ISwitchboard(SWITCH).callFunction{value: msg.value}(
-            functionId,
-            encodedOrder
-        );
+        address callId = ISwitchboard(switchboardAddress).callFunction{
+            value: msg.value
+        }(functionId, encodedOrder);
 
         // store the order data
         orders[nextOrderId].sender = msg.sender;
@@ -84,8 +83,8 @@ contract SwitchboardParamsReceiver {
     function fillOrder(uint256 orderId, uint256 value) external {
         // make sure that sender is the switchboard contract
         address signer = msg.sender;
-        if (signer != SWITCH) {
-            revert InvalidSender(SWITCH, signer);
+        if (signer != switchboardAddress) {
+            revert InvalidSender(switchboardAddress, signer);
         }
 
         // get encoded function id

@@ -30,6 +30,7 @@ async function main() {
     await tx.wait();
   }
 
+  // TODO: modify this number per network - must be Gas Price * 300_000 (300k gas)
   const resp = await receiverContract.createOrder({
     value: 9_000_000_000_000_000,
   });
