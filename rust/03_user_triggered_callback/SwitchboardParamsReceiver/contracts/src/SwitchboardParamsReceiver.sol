@@ -2,20 +2,13 @@
 pragma solidity ^0.8.9;
 
 // Get the Switchboard Library - this is the Core Mainnet Deployment, you can swap this for one of the networks below
-import {Switchboard} from "@switchboard-xyz/evm.js/contracts/core/Switchboard.sol";
-
-/*
- * NOTE: replace with one of the following imports to use an actual network deployment
- * import {Switchboard} from "@switchboard-xyz/evm.js/contracts/core/testnet/Switchboard.sol";
- * import {Switchboard} from "@switchboard-xyz/evm.js/contracts/core/Switchboard.sol";
- * import {Switchboard} from "@switchboard-xyz/evm.js/contracts/arbitrum/testnet/Switchboard.sol";
- * import {Switchboard} from "@switchboard-xyz/evm.js/contracts/arbitrum/Switchboard.sol";
- * etc...
- */
+import {ISwitchboard} from "@switchboard-xyz/evm.js/contracts/ISwitchboard.sol";
 
 // An example of a contract where we pass some parameters to the callback function so we can
 // handle individual orders in a batch.
 contract SwitchboardParamsReceiver {
+    address public constant SWITCH = 0xf9BD4FA5152b029576F33565Afb676da98Dd0563;
+
     // Events
     event OrderCreated(uint256 orderId, address callId, address sender);
     event OrderResolved(uint256 orderId, address callId, uint256 value);
@@ -24,6 +17,8 @@ contract SwitchboardParamsReceiver {
     error InvalidValue(uint256 value);
     error InvalidSender(address expected, address actual);
     error InvalidOrder(uint256 orderId);
+    error MissingEncodedFunctionId();
+    error AlreadyInitialized(address functionId);
 
     // Structs
     struct Order {
@@ -50,6 +45,10 @@ contract SwitchboardParamsReceiver {
     mapping(uint256 => Order) public orders;
     uint256 public latestValue;
 
+    constructor() {
+        nextOrderId = 1;
+    }
+
     // Call the switchboard function with the order parameters
     // The function will call back into fillOrder with the value
     function createOrder() external payable {
@@ -65,10 +64,9 @@ contract SwitchboardParamsReceiver {
         );
 
         // call out to the swithcboard function, triggering an off-chain run
-        address callId = Switchboard.callFunction(
+        address callId = ISwitchboard(SWITCH).callFunction{value: msg.value}(
             functionId,
-            encodedOrder,
-            msg.value
+            encodedOrder
         );
 
         // store the order data
@@ -84,8 +82,24 @@ contract SwitchboardParamsReceiver {
 
     // Callback into contract with value computed off-chain
     function fillOrder(uint256 orderId, uint256 value) external {
-        // extract the sender from the callback, this validates that the switchboard contract called this function
-        address encodedFunctionId = Switchboard.getEncodedFunctionId();
+        // make sure that sender is the switchboard contract
+        address signer = msg.sender;
+        if (signer != SWITCH) {
+            revert InvalidSender(SWITCH, signer);
+        }
+
+        // get encoded function id
+        address encodedFunctionId = address(0);
+        if (msg.data.length >= 20) {
+            assembly {
+                encodedFunctionId := shr(
+                    96,
+                    calldataload(sub(calldatasize(), 20))
+                )
+            }
+        } else {
+            revert MissingEncodedFunctionId();
+        }
 
         // if callback hasn't been hit, set it on first function run
         // @NOTE: do not do this in production, this is just for ease of testing
@@ -111,5 +125,17 @@ contract SwitchboardParamsReceiver {
 
         // emit an event
         emit OrderResolved(orderId, encodedFunctionId, value);
+    }
+
+    // initialize the contract with the switchboard function id - can only be called once!
+    function initialize(address _functionId) external {
+        if (functionId != address(0)) {
+            revert AlreadyInitialized(functionId);
+        }
+        functionId = _functionId;
+    }
+
+    function isInitialized() external view returns (bool) {
+        return functionId != address(0);
     }
 }

@@ -127,12 +127,6 @@ Export the address to your environment and navigate to `./switchboard-function/`
 
 The bulk of the function logic can be found in [./switchboard-function/src/main.rs](switchboard-function/src/main.rs).
 
-Build functions from the `switchboard-function/` directory with
-
-```bash
-make build
-```
-
 ### Publishing and Initialization
 
 You'll also need to pick a container name that your switchboard function will use on dockerhub.
